@@ -1,0 +1,88 @@
+#!/bin/bash
+
+arg="${1}"
+
+old_tag=$(
+  git tag \
+    | tail -n 1
+)
+
+if test '' == "${old_tag}"; then
+  tag=0.0.0
+else
+  case "${arg}" in
+    major)
+      tag=$(
+        echo "${old_tag}" \
+          | sed 's/\./\n/g' \
+          | { 
+            readarray tag_parts
+            let tag_parts[0]++
+            tag_parts[1]=0
+            tag_parts[2]=0
+            for part in "${tag_parts[@]}"; do
+              echo "${part}"
+            done
+          } \
+          | while read l; do
+            if echo "${l}" | grep -qE '[0-9]'; then
+              echo -n $l'.'
+            fi
+          done \
+          | sed 's/\.$//'
+      )
+      ;;
+    minor)
+      tag=$(
+        echo "${old_tag}" \
+          | sed 's/\./\n/g' \
+          | { 
+            readarray tag_parts
+            let tag_parts[1]++
+            tag_parts[2]=0
+            for part in "${tag_parts[@]}"; do
+              echo "${part}"
+            done
+          } \
+          | while read l; do
+            if echo "${l}" | grep -qE '[0-9]'; then
+              echo -n $l'.'
+            fi
+          done \
+          | sed 's/\.$//'
+      )
+      ;;
+    automatic)
+      if test -e ./api_tests; then
+        false
+      else
+        level=patch
+      fi
+      ;;&
+    patch)
+      tag=$(
+        echo "${old_tag}" \
+          | sed 's/\./\n/g' \
+          | { 
+            readarray tag_parts
+            let tag_parts[2]++
+            for part in "${tag_parts[@]}"; do
+              echo "${part}"
+            done
+          } \
+          | while read l; do
+            if echo "${l}" | grep -qE '[0-9]'; then
+              echo -n $l'.'
+            fi
+          done \
+          | sed 's/\.$//'
+      )
+      ;;
+    *)
+      echo "ERROR:  Unrecognized argument:  ${arg}"
+      exit 1
+      ;;
+  esac
+fi
+
+git tag -a "${tag}" -m "Automatic ${arg} increment."
