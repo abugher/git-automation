@@ -11,6 +11,24 @@ if test '' == "${old_tag}"; then
   tag=0.0.0
 else
   case "${arg}" in
+    automatic)
+      level=patch
+      if test -e ./api_tests; then
+        if test -e .api_tests.previous; then
+          while read line; do
+            if ! grep -q "^${line}$" .api_tests.previous; then
+              level=minor
+            fi
+          done < api_tests
+          while read line; do
+            if ! grep -q "^${line}$" api_tests; then
+              level=major
+            fi
+          done < .api_tests.previous
+        fi
+        cp api_tests .api_tests.previous
+      fi
+      ;;&
     major)
       tag=$(
         echo "${old_tag}" \
@@ -52,13 +70,6 @@ else
           | sed 's/\.$//'
       )
       ;;
-    automatic)
-      if test -e ./api_tests; then
-        false
-      else
-        level=patch
-      fi
-      ;;&
     patch)
       tag=$(
         echo "${old_tag}" \
