@@ -14,12 +14,12 @@ else
   if test 'automatic' == "${arg}" -a -e ./api_tests; then
     if test -e .api_tests.previous; then
       while read line; do
-        if ! grep -q "^${line}$" .api_tests.previous; then
+        if echo "${line}" | grep -qv '^ *$' && ! grep -q "^${line}$" .api_tests.previous; then
           level=minor
         fi
       done < api_tests
       while read line; do
-        if ! grep -q "^${line}$" api_tests; then
+        if echo "${line}" | grep -qv '^ *$' && ! grep -q "^${line}$" api_tests; then
           level=major
         fi
       done < .api_tests.previous
