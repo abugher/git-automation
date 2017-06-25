@@ -1,6 +1,6 @@
 #!/bin/bash
 
-arg="${1}"
+level="${1}"
 
 old_tag=$(
   git tag \
@@ -10,7 +10,7 @@ old_tag=$(
 if test '' == "${old_tag}"; then
   tag=0.0.0
 else
-  case "${arg}" in
+  case "${level}" in
     automatic)
       level=patch
       if test -e ./api_tests; then
@@ -90,10 +90,10 @@ else
       )
       ;;
     *)
-      echo "ERROR:  Unrecognized argument:  ${arg}"
+      echo "ERROR:  Unrecognized argument:  ${level}"
       exit 1
       ;;
   esac
 fi
 
-git tag -a "${tag}" -m "Automatic ${arg} increment."
+git tag -a "${tag}" -m "Automatic ${level} increment."
