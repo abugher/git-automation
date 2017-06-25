@@ -10,8 +10,12 @@ case "${1}" in
   'major')
     level='major'
     ;;
-  *)
+  '')
     level='automatic'
+    ;;
+  *)
+    echo "What's ${1}?"
+    exit 1
     ;;
 esac
 
