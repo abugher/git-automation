@@ -21,7 +21,7 @@ else
               found=yes
             fi
           done < .api_tests.previous
-          if 'no' == "${found}"; then
+          if test 'no' == "${found}"; then
             level=minor
           fi
         fi
@@ -34,7 +34,7 @@ else
               found=yes
             fi
           done < api_tests
-          if 'no' == "${found}"; then
+          if test 'no' == "${found}"; then
             level=major
           fi
         fi
