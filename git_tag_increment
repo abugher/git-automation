@@ -1,6 +1,6 @@
 #!/bin/bash
 
-level="${1}"
+arg="${1}"
 
 old_tag=$(
   git tag \
@@ -10,25 +10,26 @@ old_tag=$(
 if test '' == "${old_tag}"; then
   tag=0.0.0
 else
-  case "${level}" in
-    automatic)
-      level=patch
-      if test -e ./api_tests; then
-        if test -e .api_tests.previous; then
-          while read line; do
-            if ! grep -q "^${line}$" .api_tests.previous; then
-              level=minor
-            fi
-          done < api_tests
-          while read line; do
-            if ! grep -q "^${line}$" api_tests; then
-              level=major
-            fi
-          done < .api_tests.previous
+  level=patch
+  if test 'automatic' == "${arg}" -a -e ./api_tests; then
+    if test -e .api_tests.previous; then
+      while read line; do
+        if ! grep -q "^${line}$" .api_tests.previous; then
+          level=minor
         fi
-        cp api_tests .api_tests.previous
-      fi
-      ;;&
+      done < api_tests
+      while read line; do
+        if ! grep -q "^${line}$" api_tests; then
+          level=major
+        fi
+      done < .api_tests.previous
+    else
+      level=minor
+    fi
+    cp api_tests .api_tests.previous
+  fi
+
+  case "${level}" in
     major)
       tag=$(
         echo "${old_tag}" \
