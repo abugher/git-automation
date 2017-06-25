@@ -90,7 +90,7 @@ else
       )
       ;;
     *)
-      echo "ERROR:  Unrecognized argument:  ${level}"
+      echo "ERROR:  Unrecognized argument:  '${level}'"
       exit 1
       ;;
   esac
