@@ -1,5 +1,8 @@
 #!/bin/bash
 
+shopt -s expand_aliases
+alias unpath="sed 's#^.*/##g'"
+
 arg="${1}"
 
 old_tag=$(
@@ -12,35 +15,35 @@ if test '' == "${old_tag}"; then
 else
   level=patch
   if test 'automatic' == "${arg}" -a -e ./api_tests; then
-    if test -e .api_tests.previous; then
-      while read line; do
-        if echo "${line}" | grep -qv '^ *$'; then
-          found=no
-          while read other_line; do
-            if test "${line}" == "${other_line}"; then
-              found=yes
-            fi
-          done < .api_tests.previous
-          if test 'no' == "${found}"; then
-            level=minor
+    if test -d .api_tests.previous.d; then
+      for testfile in .api_tests.d/*; do
+        while read line; do
+          if echo "${line}" | grep -qv '^ *$'; then
+            while read other_line; do
+              if test "${line}" == "${other_line}"; then
+                level=minor
+              fi
+            done < .api_tests.previous
           fi
-        fi
-      done < api_tests
-      while read line; do
-        if echo "${line}" | grep -qv '^ *$'; then
-          found=no
-          while read other_line; do
-            if test "${line}" == "${other_line}"; then
-              found=yes
-            fi
-          done < api_tests
-          if test 'no' == "${found}"; then
-            level=major
+        done < "${testfile}"
+      done
+      for testfile in .api_tests.previous.d/*; do
+        while read line; do
+          if echo "${line}" | grep -qv '^ *$'; then
+            while read other_line; do
+              if test "${line}" == "${other_line}"; then
+                level=minor
+              fi
+            done < api_tests
           fi
+        done < "${testfile}"
+      done
+      for testfile in .api_tests.previous.d/*; do
+        testname="$(echo "${testfile}" | unpath)"
+        if ! test -e .api_tests.d/"${testname}"; then
+          level=major
         fi
-      done < .api_tests.previous
-    else
-      level=minor
+      done
     fi
     cp api_tests .api_tests.previous
   fi
