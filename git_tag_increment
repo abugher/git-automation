@@ -35,7 +35,6 @@ else
         fi
       done
     fi
-    cp api_tests .api_tests.previous
     rsync -r --delete api_tests.d/ .api_tests.previous.d/
   fi
 
