@@ -14,38 +14,29 @@ if test '' == "${old_tag}"; then
   tag=0.0.0
 else
   level=patch
-  if test 'automatic' == "${arg}" -a -e ./api_tests; then
+  if test 'automatic' == "${arg}" -a -e ./api_tests.d; then
     if test -d .api_tests.previous.d; then
-      for testfile in .api_tests.d/*; do
-        while read line; do
-          if echo "${line}" | grep -qv '^ *$'; then
-            while read other_line; do
-              if test "${line}" == "${other_line}"; then
-                level=minor
-              fi
-            done < .api_tests.previous
-          fi
-        done < "${testfile}"
+      for test_file in api_tests.d/*; do
+        test_name="$(echo "${test_file}" | unpath)"
+        if diff -q "${test_file}" .api_tests.previous.d/"${test_name}"; then
+          level=minor
+        fi
       done
-      for testfile in .api_tests.previous.d/*; do
-        while read line; do
-          if echo "${line}" | grep -qv '^ *$'; then
-            while read other_line; do
-              if test "${line}" == "${other_line}"; then
-                level=minor
-              fi
-            done < api_tests
-          fi
-        done < "${testfile}"
+      for test_file in .api_tests.previous.d/*; do
+        test_name="$(echo "${test_file}" | unpath)"
+        if ! test -e api_tests.d/"${test_name}"; then
+          level=major
+        fi
       done
-      for testfile in .api_tests.previous.d/*; do
-        testname="$(echo "${testfile}" | unpath)"
-        if ! test -e .api_tests.d/"${testname}"; then
+      for test_file in api_tests.d/*; do
+        test_name="$(echo "${test_file}" | unpath)"
+        if ! test -e .api_tests.previous.d/"${test_name}"; then
           level=major
         fi
       done
     fi
     cp api_tests .api_tests.previous
+    rsync -r --delete api_tests.d/ .api_tests.previous.d/
   fi
 
   case "${level}" in
