@@ -4,6 +4,8 @@ PATH="$HOME/code/github/abugher/git-automation:${PATH}"
 
 test_dir="/tmp/git-automation_tests"
 test_repo="${test_dir}/repo"
+master_repo="${test_dir}/master"
+old_cwd="${PWD}"
 
 test_count=0
 failure_count=0
@@ -11,12 +13,17 @@ success_count=0
 
 rm -rf "${test_dir}"
 mkdir "${test_dir}"
-mkdir "${test_repo}"
+mkdir "${master_repo}"
+cd "${master_repo}"
+git init --bare
+git clone "${master_repo}" "${test_repo}"
 cd "${test_repo}"
-git init
-touch thing
-cd -
-
+touch thing1
+git add thing1
+git commit
+git push
+touch thing2
+cd "${old_cwd}"
 
 for t in api_tests.d/*; do
   if test 'api_tests.d/*' == "${t}"; then

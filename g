@@ -1,6 +1,8 @@
 #!/bin/bash
 
-case "${1}" in
+l="${1}"
+
+case "${l}" in
   'patch')
     level='patch'
     ;;
@@ -10,19 +12,29 @@ case "${1}" in
   'major')
     level='major'
     ;;
-  '')
+  'automatic')
     level='automatic'
     ;;
+  '')
+    echo "Specify a change level."
+    exit 1
+    ;;
   *)
-    echo "What's ${1}?"
+    echo "What's ${l}?"
     exit 1
     ;;
 esac
 
+commit_args=''
+message="${2}"
+if echo message | grep -q '.'; then
+  commit_args="-m '${message}'"
+fi
+
     git pull \
 &&  git add . \
 &&  git add -u . \
-&&  git commit \
+&&  eval git commit ${commit_args} \
 &&  git_tag_increment "${level}" \
 &&  git push \
 &&  git push --tags
