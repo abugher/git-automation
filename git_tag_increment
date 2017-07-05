@@ -22,15 +22,15 @@ else
           level=minor
         fi
       done
-      for test_file in .api_tests.previous.d/*; do
-        test_name="$(echo "${test_file}" | unpath)"
-        if ! test -e api_tests.d/"${test_name}"; then
-          level=major
-        fi
-      done
       for test_file in api_tests.d/*; do
         test_name="$(echo "${test_file}" | unpath)"
         if ! test -e .api_tests.previous.d/"${test_name}"; then
+          level=minor
+        fi
+      done
+      for test_file in .api_tests.previous.d/*; do
+        test_name="$(echo "${test_file}" | unpath)"
+        if ! test -e api_tests.d/"${test_name}"; then
           level=major
         fi
       done
