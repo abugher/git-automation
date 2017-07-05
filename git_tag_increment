@@ -38,7 +38,7 @@ else
     fi
     rsync -r --delete api_tests.d/ .api_tests.previous.d/
   else
-    echo "debug"
+    echo "debug:  arg=${arg}"
   fi
 
   case "${level}" in
