@@ -37,13 +37,6 @@ else
       done
     fi
     rsync -r --delete api_tests.d/ .api_tests.previous.d/
-  else
-    if ! test -e api_tests.d; then
-      echo "debug:  api_tests.d does not exist"
-    fi
-    if ! test 'automatic' == "${arg}"; then
-      echo "debug:  arg='${arg}'"
-    fi
   fi
 
   case "${level}" in
