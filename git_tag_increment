@@ -15,7 +15,7 @@ if test '' == "${old_tag}"; then
   tag=0.0.0
 else
   level=patch
-  if test 'automatic' == "${arg}" -a -e ./api_tests.d; then
+  if test 'automatic' == "${arg}" -a -e api_tests.d; then
     if test -d .api_tests.previous.d; then
       for test_file in api_tests.d/*; do
         test_name="$(echo "${test_file}" | unpath)"
@@ -37,6 +37,8 @@ else
       done
     fi
     rsync -r --delete api_tests.d/ .api_tests.previous.d/
+  else
+    echo "debug"
   fi
 
   case "${level}" in
