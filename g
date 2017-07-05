@@ -16,8 +16,7 @@ case "${l}" in
     level='automatic'
     ;;
   '')
-    echo "Specify a change level."
-    exit 1
+    level='automatic'
     ;;
   *)
     echo "What's ${l}?"
@@ -27,7 +26,7 @@ esac
 
 commit_args=''
 message="${2}"
-if echo message | grep -q '.'; then
+if echo "${message}" | grep -q '.'; then
   commit_args="-m '${message}'"
 fi
 
