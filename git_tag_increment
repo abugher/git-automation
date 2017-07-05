@@ -18,7 +18,7 @@ else
   if test 'automatic' == "${arg}" -a -e api_tests.d; then
     if test -d .api_tests.previous.d; then
       for test_file in api_tests.d/*; do
-        if test 'api_tests.d' == "${test_file}"; then
+        if test 'api_tests.d/*' == "${test_file}"; then
           continue
         fi
         test_name="$(echo "${test_file}" | unpath)"
@@ -27,7 +27,7 @@ else
         fi
       done
       for test_file in api_tests.d/*; do
-        if test 'api_tests.d' == "${test_file}"; then
+        if test 'api_tests.d/*' == "${test_file}"; then
           continue
         fi
         test_name="$(echo "${test_file}" | unpath)"
@@ -36,11 +36,13 @@ else
         fi
       done
       for test_file in .api_tests.previous.d/*; do
-        if test '.api_tests.previous.d' == "${test_file}"; then
+        if test '.api_tests.previous.d/*' == "${test_file}"; then
           continue
         fi
         test_name="$(echo "${test_file}" | unpath)"
         if ! test -e api_tests.d/"${test_name}"; then
+          echo "debug:  test_file='${test_file}'"
+          echo "debug:  test_file='${test_name}'"
           level=major
         fi
       done
