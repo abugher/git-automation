@@ -3,6 +3,7 @@
 PATH="$HOME/code/github/abugher/git-automation:${PATH}"
 
 test_dir="/tmp/git-automation_tests"
+test_repo="${test_dir}/repo"
 
 test_count=0
 failure_count=0
@@ -10,6 +11,12 @@ success_count=0
 
 rm -rf "${test_dir}"
 mkdir "${test_dir}"
+mkdir "${test_repo}"
+cd "${test_repo}"
+git init
+touch thing
+cd -
+
 
 for t in api_tests.d/*; do
   if test 'api_tests.d/*' == "${t}"; then
@@ -32,7 +39,6 @@ for t in api_tests.d/*; do
   done < "${t}"
   if test '0' == "${fc}"; then
     let success_count++
-    echo "debug:  ${t}"
   else
     let failure_count++
   fi
