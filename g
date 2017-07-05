@@ -27,4 +27,4 @@ esac
 &&  git push \
 &&  git push --tags
 
-git tag | tail -n 1
+git tag | sort -V | tail -n 1
