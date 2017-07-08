@@ -20,7 +20,7 @@ git clone "${master_repo}" "${test_repo}"
 cd "${test_repo}"
 touch thing1
 git add thing1
-git commit
+git commit -m 'No comment.'
 git push
 touch thing2
 cd "${old_cwd}"
