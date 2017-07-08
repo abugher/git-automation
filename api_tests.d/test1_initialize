@@ -1,8 +1,0 @@
-cd "${test_repo}"
-output="$(g automatic -m 'No comment.' 2>&1)"
-ret="${?}"
-version="$(echo "${output}" | tail -n 1)"
-test "${version}" == '0.0.0'
-echo "${version}" > "${test_dir}"/version.txt
-echo "${output}" > "${test_dir}"/output.txt
-echo "${ret}" > "${test_dir}"/ret.txt

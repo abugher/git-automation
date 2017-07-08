@@ -15,42 +15,35 @@ if test '' == "${old_tag}"; then
   tag=0.0.0
 else
   level=patch
+  NULLGLOB=$(shopt nullglob | { read x y && echo $y; }) || fail
+  shopt -s nullglob || fail
   if test 'automatic' == "${arg}" -a -e api_tests.d; then
     if test -d .api_tests.previous.d; then
-      NULLGLOB=$(shopt nullglob | { read x y && echo $y; }) || fail
-      shopt -s nullglob || fail
       for test_file in api_tests.d/*; do
-        if test 'api_tests.d/*' == "${test_file}"; then
-          continue
-        fi
         test_name="$(echo "${test_file}" | unpath)"
         if ! diff -q "${test_file}" .api_tests.previous.d/"${test_name}"; then
           level=minor
         fi
       done
       for test_file in api_tests.d/*; do
-        if test 'api_tests.d/*' == "${test_file}"; then
-          continue
-        fi
         test_name="$(echo "${test_file}" | unpath)"
         if ! test -e .api_tests.previous.d/"${test_name}"; then
           level=minor
         fi
       done
       for test_file in .api_tests.previous.d/*; do
-        if test '.api_tests.previous.d/*' == "${test_file}"; then
-          continue
-        fi
         test_name="$(echo "${test_file}" | unpath)"
         if ! test -e api_tests.d/"${test_name}"; then
           level=major
         fi
       done
-      if test 'off' == "${NULLGLOB}"; then
-        shopt -u nullglob || fail
-      fi
     fi
-    rsync -r --delete api_tests.d/ .api_tests.previous.d/
+  else
+    level=minor
+  fi
+  rsync -r --delete api_tests.d/ .api_tests.previous.d/
+  if test 'off' == "${NULLGLOB}"; then
+    shopt -u nullglob || fail
   fi
 
   case "${level}" in

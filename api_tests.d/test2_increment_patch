@@ -1,0 +1,4 @@
+touch thing3
+output="$(g automatic 'No comment.')"
+version="$(echo "${output}" | tail -n 1)"
+test "${version}" == '0.0.1'

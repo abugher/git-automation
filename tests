@@ -31,18 +31,23 @@ for t in api_tests.d/*; do
   fi
   echo "${t}"
   let test_count++
+  lineno=0
   sc=0
   fc=0
   tc=0
   while read command; do
+    let lineno++
+    oldpwd=$PWD
+    cd "${test_repo}"
     let tc++
     if eval "${command}" >/dev/null 2>&1; then
       #echo "Pass:  ${test_count}"
       let sc++
     else
-      echo "Fail:  ${test_count}"
+      echo "Fail:  ${lineno}"
       let fc++
     fi
+    cd $oldpwd
   done < "${t}"
   if test '0' == "${fc}"; then
     let success_count++
