@@ -1,5 +1,4 @@
-mkdir api_tests.d
-echo true > api_tests.d/test1
+echo true >> api_tests.d/test1
 output="$(g automatic 'No comment.')"
 version="$(echo "${output}" | tail -n 1)"
-test "${version}" == '0.1.0'
+test "${version}" == '0.2.0'
