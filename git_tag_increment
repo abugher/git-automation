@@ -24,7 +24,7 @@ else
           continue
         fi
         test_name="$(echo "${test_file}" | unpath)"
-        if diff -q "${test_file}" .api_tests.previous.d/"${test_name}"; then
+        if ! diff -q "${test_file}" .api_tests.previous.d/"${test_name}"; then
           level=minor
         fi
       done
