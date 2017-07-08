@@ -37,11 +37,11 @@ else
           level=major
         fi
       done
+    else
+      level=minor
     fi
-  else
-    level=minor
+    rsync -r --delete api_tests.d/ .api_tests.previous.d/
   fi
-  rsync -r --delete api_tests.d/ .api_tests.previous.d/
   if test 'off' == "${NULLGLOB}"; then
     shopt -u nullglob || fail
   fi
