@@ -43,8 +43,6 @@ else
         fi
         test_name="$(echo "${test_file}" | unpath)"
         if ! test -e api_tests.d/"${test_name}"; then
-          echo "debug:  test_file='${test_file}'"
-          echo "debug:  test_file='${test_name}'"
           level=major
         fi
       done
