@@ -17,6 +17,8 @@ else
   level=patch
   if test 'automatic' == "${arg}" -a -e api_tests.d; then
     if test -d .api_tests.previous.d; then
+      NULLGLOB=$(shopt nullglob | { read x y && echo $y; }) || fail
+      shopt -s nullglob || fail
       for test_file in api_tests.d/*; do
         if test 'api_tests.d/*' == "${test_file}"; then
           continue
@@ -46,6 +48,9 @@ else
           level=major
         fi
       done
+      if test 'off' == "${NULLGLOB}"; then
+        shopt -u nullglob || fail
+      fi
     fi
     rsync -r --delete api_tests.d/ .api_tests.previous.d/
   fi
