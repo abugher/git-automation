@@ -1,0 +1,4 @@
+echo true >> api_tests.d/test1
+output="$(g automatic 'No comment.')"
+version="$(echo "${output}" | tail -n 1)"
+test "${version}" == '0.2.0'
