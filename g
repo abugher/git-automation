@@ -32,9 +32,6 @@ fi
 
 
 function fail {
-  # Only useful in the context of:
-  #   do_thing || fail "Oh no!"
-  # ... because it passes through the most recent exit code.
   ret=$?
   echo "Failed:  ${1}" >&2
   exit $ret
