@@ -30,12 +30,58 @@ if echo "${message}" | grep -q '.'; then
   commit_args="-m '${message}'"
 fi
 
-    git pull \
-&&  git add . \
-&&  git add -u . \
-&&  eval git commit ${commit_args} \
-&&  git_tag_increment "${level}" \
-&&  git push \
-&&  git push --tags
 
-git tag | sort -V | tail -n 1
+function fail {
+  # Only useful in the context of:
+  #   do_thing || fail "Oh no!"
+  # ... because it passes through the most recent exit code.
+  ret=$?
+  echo "Failed:  ${1}" >&2
+  exit $ret
+}
+
+
+function recurse {
+  for subproject in $(
+    if test -f .gitmodules; then
+      grep -E '^\spath = ' .gitmodules \
+      | sed 's/^\spath = //'
+    fi
+  ); do 
+    echo "Enter subproject:  ${subproject}"
+    cd $subproject || fail "enter subproject directory:  ${subproject}"
+    recurse || fail "recurse"
+    cd - || fail "leave subproject directory:  ${subproject}"
+    git add $subproject || fail "git add ${subproject} # submodule"
+    echo "Leave subproject:  ${subproject}"
+  done
+
+  git add . || fail "add files"
+  git add -u . || fail "remove files"
+
+  git diff-index --quiet HEAD
+
+  case $? in
+    0)
+      true
+      ;;
+    1)
+      eval git commit ${commit_args} || fail "commit"
+      ;;
+    *)
+      fail "check for changes to commit"
+  esac
+
+  git_tag_increment "${level}" || fail "tag"
+
+  git checkout master || fail "checkout master"
+
+  git push || fail "push"
+  git push --tags || fail "push tags"
+  git pull || fail "pull"
+  git submodule update || fail "update"
+  git tag | sort -V | tail -n 1 || fail "display current version"
+}
+
+
+recurse
