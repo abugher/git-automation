@@ -1,29 +1,60 @@
 #!/bin/bash
 
+function fail {
+  echo "Failed to initialize testing.  (${1})" >&2
+  exit 1
+}
+
+
 PATH="$HOME/code/github/abugher/git-automation:${PATH}"
 
 test_dir="/tmp/git-automation_tests"
-test_repo="${test_dir}/repo"
 master_repo="${test_dir}/master"
+master_sub_repo="${test_dir}/sub_master"
+sub_repo="${test_dir}/sub_repo"
+test_repo="${test_dir}/repo"
+test_sub_repo="${test_repo}/sub"
 old_cwd="${PWD}"
 
 test_count=0
 failure_count=0
 success_count=0
 
-rm -rf "${test_dir}"
-mkdir "${test_dir}"
-mkdir "${master_repo}"
-cd "${master_repo}"
-git init --bare
-git clone "${master_repo}" "${test_repo}"
-cd "${test_repo}"
-touch thing1
-git add thing1
-git commit -m 'No comment.'
-git push
-touch thing2
-cd "${old_cwd}"
+rm -rf "${test_dir}" || fail 1
+mkdir "${test_dir}" || fail 2
+
+mkdir "${master_repo}" || fail 3
+cd "${master_repo}" || fail 4
+git init --bare || fail 5
+git clone "${master_repo}" "${test_repo}" || fail 6
+cd "${test_repo}" || fail 7
+touch thing1 || fail 8
+git add thing1 || fail 9
+git commit -m 'No comment.' || fail 10
+git push || fail 11
+touch thing2 || fail 12
+
+mkdir "${master_sub_repo}" || fail 26
+cd "${master_sub_repo}" || fail 27
+git init --bare || fail 28
+git clone "${master_sub_repo}" "${sub_repo}" || fail 29
+cd "${sub_repo}" || fail 30
+touch thing1 || fail 31
+git add thing1 || fail 32
+git commit -m 'No comment.' || fail 33
+git push || fail 34
+
+cd "${test_repo}" || fail 16
+git submodule add "${master_sub_repo}" "${test_sub_repo}" || fail 17
+cd "${test_sub_repo}" || fail 18
+git pull || fail 19
+touch sub_thing1 || fail 20
+git add sub_thing1 || fail 21
+git commit -m 'No sub_comment.' || fail 22
+git push || fail 23
+touch sub_thing2 || fail 24
+
+cd "${old_cwd}" || fail 25
 
 for t in api_tests.d/*; do
   if test 'api_tests.d/*' == "${t}"; then
