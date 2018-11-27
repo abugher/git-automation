@@ -39,6 +39,8 @@ function fail {
 
 
 function recurse {
+  git submodule init
+
   for subproject in $(
     if test -f .gitmodules; then
       grep -E '^\spath = ' .gitmodules \
@@ -64,12 +66,11 @@ function recurse {
       ;;
     1)
       eval git commit ${commit_args} || fail "commit"
+      git_tag_increment "${level}" || fail "tag"
       ;;
     *)
       fail "check for changes to commit"
   esac
-
-  git_tag_increment "${level}" || fail "tag"
 
   git checkout master || fail "checkout master"
 
