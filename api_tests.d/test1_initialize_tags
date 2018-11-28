@@ -7,4 +7,3 @@ test "${version}" == '0.0.0'
 output="$(g automatic 'No comment.')"
 version="$(echo "${output}" | tail -n 1)"
 test "${version}" == '0.0.0'
-
