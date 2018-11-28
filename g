@@ -68,7 +68,18 @@ function recurse {
       eval git commit ${commit_args} || fail "commit"
       git_tag_increment "${level}" || fail "tag"
       git add . || fail "add files"
-      eval git commit ${commit_args} -m "'Posting old test files for comparison.'" || fail "commit"
+      git diff-index --quiet HEAD
+      case $? in
+        0)
+          true
+          ;;
+        1)
+          eval git commit ${commit_args} -m "'Posting old test files for comparison.'" || fail "commit"
+          ;;
+        *)
+          fail "check for old test files to commit"
+          ;;
+      esac
       ;;
     *)
       fail "check for changes to commit"
