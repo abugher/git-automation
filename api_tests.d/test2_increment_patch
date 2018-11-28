@@ -1,4 +1,12 @@
-touch thing3
+cd "${main_single_repo}"
+
+g automatic 'No comment.'
+touch thing1
 output="$(g automatic 'No comment.')"
 version="$(echo "${output}" | tail -n 1)"
 test "${version}" == '0.0.1'
+
+touch thing2
+output="$(g patch 'No comment.')"
+version="$(echo "${output}" | tail -n 1)"
+test "${version}" == '0.0.2'

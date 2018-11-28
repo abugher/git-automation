@@ -1,0 +1,14 @@
+cd "${main_single_repo}"
+
+mkdir -p api_tests.d
+echo true > api_tests.d/test1
+g automatic 'No comment.'
+rm api_tests.d/test1
+output="$(g automatic 'No comment.')"
+version="$(echo "${output}" | tail -n 1)"
+test "${version}" == '1.0.0'
+
+touch thing1
+output="$(g major 'No comment.')"
+version="$(echo "${output}" | tail -n 1)"
+test "${version}" == '2.0.0'
