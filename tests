@@ -67,11 +67,11 @@ for t in api_tests.d/*; do
   sc=0
   fc=0
   tc=0
-  refresh_test_dir >/dev/null 2>&1
+  refresh_test_dir > /dev/null 2>&1
+  oldpwd=$PWD
+  cd "${test_dir}"                                            || fail 22
   while read command; do
     let lineno++
-    oldpwd=$PWD
-    cd "${test_dir}"                                            || fail 22
     let tc++
     if eval "${command}" >/dev/null 2>&1; then
       #echo "Pass:  ${test_count}"
@@ -80,8 +80,8 @@ for t in api_tests.d/*; do
       echo "Fail:  ${lineno}"
       let fc++
     fi
-    cd $oldpwd                                                  || fail 23
-  done < "${t}"
+  done < "${oldpwd}/${t}"
+  cd $oldpwd                                                  || fail 23
   if test '0' == "${fc}"; then
     let success_count++
   else

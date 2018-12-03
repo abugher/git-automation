@@ -4,6 +4,7 @@ mkdir -p api_tests.d
 echo true > api_tests.d/test1
 output="$(g automatic 'No comment.')"
 version="$(echo "${output}" | tail -n 1)"
+echo "${version}" > /tmp/version.txt
 test "${version}" == '0.1.0'
 
 echo true >> api_tests.d/test1
