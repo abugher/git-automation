@@ -71,19 +71,25 @@ function recurse {
       true
       ;;
     1)
-      echo "DEBUG:  changes"
+      echo "DEBUG:  changes:  commit"
       eval git commit ${commit_args} || fail "commit"
+      echo "DEBUG:  changes:  git_tag_increment"
       git_tag_increment "${level}" || fail "tag"
+      echo "DEBUG:  changes:  add files"
       git add . || fail "add files"
+      echo "DEBUG:  changes:  check for changes"
       git diff-index --quiet HEAD
       case $? in
         0)
+          echo "DEBUG:  changes:  unchanged"
           true
           ;;
         1)
+          echo "DEBUG:  changes:  changed:  commit"
           eval git commit ${commit_args} -m "'Posting old test files for comparison.'" || fail "commit"
           ;;
         *)
+          echo "DEBUG:  changes:  confused"
           fail "check for old test files to commit"
           ;;
       esac
