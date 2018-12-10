@@ -1,4 +1,3 @@
-set -x
 cd "${main_single_repo}"
 
 touch thing1

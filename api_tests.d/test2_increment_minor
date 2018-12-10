@@ -1,4 +1,3 @@
-set -x
 cd "${main_single_repo}"
 
 mkdir -p api_tests.d
