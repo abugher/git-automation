@@ -73,8 +73,8 @@ function recurse {
     1)
       echo "DEBUG:  changes:  commit"
       eval git commit ${commit_args} || fail "commit"
-      echo "DEBUG:  changes:  git_tag_increment"
-      git_tag_increment "${level}" || fail "tag"
+#      echo "DEBUG:  changes:  git_tag_increment"
+#      git_tag_increment "${level}" || fail "tag"
       echo "DEBUG:  changes:  add files"
       git add . || fail "add files"
       echo "DEBUG:  changes:  check for changes"
