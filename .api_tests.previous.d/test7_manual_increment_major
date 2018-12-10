@@ -1,0 +1,3 @@
+output="$(g major 'No comment.')"
+version="$(echo "${output}" | tail -n 1)"
+test "${version}" == '2.0.0'
