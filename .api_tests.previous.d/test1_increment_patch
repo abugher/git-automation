@@ -1,16 +1,23 @@
+set -x
 cd "${main_single_repo}"
 
 touch thing1
 output="$(g automatic 'No comment.')"
-version="$(echo "${output}" | tail -n 1)"
-test "${version}" == '0.0.0'
+version="$(tail -n 1 <<< "${output}")"
+if ! test '0.0.1' == "${version}"; then
+  return 1
+fi
 
 touch thing2
 output="$(g automatic 'No comment.')"
-version="$(echo "${output}" | tail -n 1)"
-test "${version}" == '0.0.1'
+version="$(tail -n 1 <<< "${output}")"
+if ! test "${version}" == '0.0.2'; then
+  return 2
+fi
 
 touch thing3
 output="$(g patch 'No comment.')"
-version="$(echo "${output}" | tail -n 1)"
-test "${version}" == '0.0.2'
+version="$(tail -n 1 <<< "${output}")"
+if ! test "${version}" == '0.0.3'; then
+  return 3
+fi

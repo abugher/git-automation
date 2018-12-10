@@ -1,3 +1,0 @@
-output="$(g minor 'No comment.')"
-version="$(echo "${output}" | tail -n 1)"
-test "${version}" == '1.1.0'
