@@ -39,6 +39,7 @@ function fail {
 
 
 function recurse {
+  echo "DEBUG:  recurse"
   git submodule init
 
   for subproject in $(
