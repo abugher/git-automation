@@ -1,11 +1,5 @@
 #!/bin/bash
 
-function fail {
-  echo "Failure code:  (${1})" >&2
-  exit 1
-}
-
-
 PATH="$HOME/code/github/abugher/git-automation:${PATH}"
 
 test_dir="/tmp/git-automation_tests"
@@ -23,6 +17,13 @@ test_count=0
 failure_count=0
 success_count=0
 
+
+function fail {
+  echo "Failure code:  (${1})" >&2
+  exit 1
+}
+
+
 function initialize_repo() {
   master=$1
   main=$2
@@ -38,6 +39,7 @@ function initialize_repo() {
   git commit -m 'No comment.'                                   || fail 58
   git push                                                      || fail 59
 }
+
 
 refresh_test_dir() {
   oldpwd=$PWD
@@ -61,34 +63,14 @@ for t in api_tests.d/*; do
   if test 'api_tests.d/*' == "${t}"; then
     continue
   fi
-  echo "${t}"
+  echo "Executing test:  ${t}"
   let test_count++
-  lineno=0
-  sc=0
-  fc=0
-  tc=0
-  refresh_test_dir > /dev/null 2>&1
-  oldpwd=$PWD
-  cd "${test_dir}"                                            || fail 22
-  while read command; do
-    let lineno++
-    let tc++
-    if eval "${command}" >/dev/null 2>&1; then
-      #echo "Pass:  ${test_count}"
-      let sc++
-    else
-      echo "Fail:  ${lineno}"
-      let fc++
-    fi
-  done < "${oldpwd}/${t}"
-  cd $oldpwd                                                  || fail 23
-  if test '0' == "${fc}"; then
-    let success_count++
-  else
-    let failure_count++
+  cwd=$(pwd)
+  if source "${t}"; then
+    success_count=$(( success_count + 1 ))
+    failure_count=$(( failure_count + 1 ))
   fi
-  echo "Success:  ${sc}/${tc}"
-  echo "Failures: ${fc}/${tc}"
+  cd $cwd
 done
 
 echo "total"
