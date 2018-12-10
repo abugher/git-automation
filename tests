@@ -66,8 +66,10 @@ for t in api_tests.d/*; do
   echo "Executing test:  ${t}"
   let test_count++
   cwd=$(pwd)
+  refresh_test_dir
   if source "${t}"; then
     success_count=$(( success_count + 1 ))
+  else
     failure_count=$(( failure_count + 1 ))
   fi
   cd $cwd
