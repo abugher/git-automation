@@ -3,6 +3,7 @@
 PATH="$HOME/code/github/abugher/git-automation:${PATH}"
 
 test_dir="/tmp/git-automation_tests"
+output_dir="/tmp/git-automation_tests_output"
 master_super_repo="${test_dir}/master_super"
 master_sub_repo="${test_dir}/master_sub"
 master_single_repo="${test_dir}/master_single"
@@ -43,21 +44,24 @@ function initialize_repo() {
 
 refresh_test_dir() {
   oldpwd=$PWD
-  rm -rf "${test_dir}"                                          || fail 0
-  mkdir "${test_dir}"                                           || fail 1
-  cd "${test_dir}"                                              || fail 2
+  rm -rf "${test_dir}"
+  mkdir "${test_dir}"
+  cd "${test_dir}"
 
-  initialize_repo "${master_single_repo}" "${main_single_repo}" || fail 10
-  initialize_repo "${master_super_repo}" "${main_super_repo}"   || fail 11
-  initialize_repo "${master_sub_repo}" "${main_sub_repo}"       || fail 12
+  initialize_repo "${master_single_repo}" "${main_single_repo}"
+  initialize_repo "${master_super_repo}" "${main_super_repo}"
+  initialize_repo "${master_sub_repo}" "${main_sub_repo}"
 
-  cd "${main_super_repo}"                                       || fail 3
-  git submodule add "${master_sub_repo}" "${sub_repo_name}"     || fail 4
-  git add "${sub_sub_repo}"                                     || fail 5
-  git submodule update --init                                   || fail 6
+  cd "${main_super_repo}"
+  git submodule add "${master_sub_repo}" "${sub_repo_name}"
+  git add "${sub_sub_repo}"
+  git submodule update --init
   cd $oldpwd
 }
 
+
+rm -rf "${output_dir}"
+mkdir "${output_dir}"
 
 for t in api_tests.d/*; do
   if test 'api_tests.d/*' == "${t}"; then
@@ -66,8 +70,8 @@ for t in api_tests.d/*; do
   echo "Executing test:  ${t}"
   let test_count++
   cwd=$(pwd)
-  refresh_test_dir
-  if source "${t}"; then
+  refresh_test_dir > /dev/null 2>&1
+  if source "${t}" > /dev/null 2>&1; then
     success_count=$(( success_count + 1 ))
   else
     failure_count=$(( failure_count + 1 ))

@@ -2,29 +2,29 @@ cd "${main_single_repo}"
 
 mkdir -p api_tests.d
 echo true > api_tests.d/test1
-output="$(g automatic 'No comment.')"
-version="$(echo "${output}" | tail -n 1)"
+g automatic 'No comment.' > "${output_dir}/2.1.txt" 2>&1
+version="$(tail -n 1 < "${output_dir}/2.1.txt")"
 if ! test "${version}" == '0.1.0'; then
   return 1
 fi
 
 echo true >> api_tests.d/test1
-output="$(g automatic 'No comment.')"
-version="$(echo "${output}" | tail -n 1)"
+g automatic 'No comment.' > "${output_dir}/2.2.txt" 2>&1
+version="$(tail -n 1 < "${output_dir}/2.2.txt")"
 if ! test "${version}" == '0.2.0'; then
   return 2
 fi
 
 echo false > api_tests.d/test1
-output="$(g automatic 'No comment.')"
-version="$(echo "${output}" | tail -n 1)"
+g automatic 'No comment.' > "${output_dir}/2.3.txt" 2>&1
+version="$(tail -n 1 < "${output_dir}/2.3.txt")"
 if ! test "${version}" == '0.3.0'; then
   return 3
 fi
 
 touch thing1
-output="$(g minor 'No comment.')"
-version="$(echo "${output}" | tail -n 1)"
+g minor 'No comment.' > "${output_dir}/2.4.txt" 2>&1
+version="$(tail -n 1 < "${output_dir}/2.4.txt")"
 if ! test "${version}" == '0.4.0'; then
   return 4
 fi
