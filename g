@@ -47,6 +47,10 @@ function recurse {
       | sed 's/^\spath = //'
     fi
   ); do 
+    if ! test -d "${subproject}/.git"; then
+      git rm --cached "${subproject}"
+      git add "${subproject}"
+    fi
     echo "Enter subproject:  ${subproject}"
     cd $subproject || fail "enter subproject directory:  ${subproject}"
     recurse || fail "recurse"
