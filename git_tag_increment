@@ -13,7 +13,7 @@ arg="${1}"
 
 old_tag=$(
   git tag \
-    | grep -E '^[0-9]+\.^[0-9]+\.^[0-9]+$' \
+    | grep -E '^[0-9]+\.[0-9]+\.[0-9]+$' \
     | sort -V \
     | tail -n 1
 )
@@ -24,103 +24,94 @@ fi
 
 level=patch
 
-NULLGLOB=$(shopt nullglob | { read x y && echo $y; }) || fail
-shopt -s nullglob || fail
-
-if test 'automatic' == "${arg}"; then
-  if test -d api_tests.d; then
-    if test -d .api_tests.previous.d; then
-      for test_file in api_tests.d/*; do
-        test_name="$(unpath <<< "${test_file}")"
-        if ! diff -q "${test_file}" .api_tests.previous.d/"${test_name}"; then
-          level=minor
-        fi
-      done
-      for test_file in api_tests.d/*; do
-        test_name="$(unpath <<< "${test_file}")"
-        if ! test -e .api_tests.previous.d/"${test_name}"; then
-          level=minor
-        fi
-      done
-      for test_file in .api_tests.previous.d/*; do
-        test_name="$(unpath <<< "${test_file}")"
-        if ! test -e api_tests.d/"${test_name}"; then
-          level=major
-        fi
-      done
-    else
-      level=minor
-    fi
-    rsync -r --delete api_tests.d/ .api_tests.previous.d/
-  else
-    level='patch'
-  fi
-else
-  level="${arg}"
+minor=0
+major=0
+git diff-index --quiet HEAD \
+| awk '/api_tests.d\// {print $5}' \
+| while read operation; do
+  case $operation in
+    A)
+      minor=1
+      ;;
+    D)
+      major=1
+      ;;
+    *)
+      ;;
+  esac
+done
+level='patch'
+if test 1 -eq minor; then
+  level='minor'
 fi
-
-if test 'off' == "${NULLGLOB}"; then
-  shopt -u nullglob || fail
+if test 1 -eq major; then
+  level='major'
 fi
 
 case "${level}" in
   major)
-    tag=$(
-      sed 's/\./\n/g' \
-      | { 
-        readarray tag_parts
-        let tag_parts[0]++
-        tag_parts[1]=0
-        tag_parts[2]=0
-        for part in "${tag_parts[@]}"; do
-          echo "${part}"
-        done
+    {
+      tag=$(
+        sed 's/\./\n/g' \
+        | { 
+          readarray tag_parts
+          let tag_parts[0]++
+          tag_parts[1]=0
+          tag_parts[2]=0
+          for part in "${tag_parts[@]}"; do
+            echo "${part}"
+          done
+        } \
+        | while read l; do
+          if echo "${l}" | grep -qE '[0-9]'; then
+            echo -n $l'.'
+          fi
+        done \
+        | sed 's/\.$//' 
       } \
-      | while read l; do
-        if echo "${l}" | grep -qE '[0-9]'; then
-          echo -n $l'.'
-        fi
-      done \
-      | sed 's/\.$//' \
       <<< "${old_tag}"
     )
     ;;
   minor)
-    tag=$(
-      sed 's/\./\n/g' \
-      | { 
-        readarray tag_parts
-        let tag_parts[1]++
-        tag_parts[2]=0
-        for part in "${tag_parts[@]}"; do
-          echo "${part}"
-        done
+    {
+      tag=$(
+        sed 's/\./\n/g' \
+        | { 
+          readarray tag_parts
+          let tag_parts[1]++
+          tag_parts[2]=0
+          for part in "${tag_parts[@]}"; do
+            echo "${part}"
+          done
+        } \
+        | while read l; do
+          if echo "${l}" | grep -qE '[0-9]'; then
+            echo -n $l'.'
+          fi
+        done \
+        | sed 's/\.$//' 
       } \
-      | while read l; do
-        if echo "${l}" | grep -qE '[0-9]'; then
-          echo -n $l'.'
-        fi
-      done \
-      | sed 's/\.$//' \
       <<< "${old_tag}"
     )
     ;;
   patch)
-    tag=$(
-      sed 's/\./\n/g' \
-      | { 
-        readarray tag_parts
-        let tag_parts[2]++
-        for part in "${tag_parts[@]}"; do
-          echo "${part}"
-        done
+    {
+      tag=$(
+        sed 's/\./\n/g' \
+        | { 
+          readarray tag_parts
+          let tag_parts[2]++
+          for part in "${tag_parts[@]}"; do
+            echo "${part}"
+          done
+        } \
+        | while read l; do
+          if echo "${l}" | grep -qE '[0-9]'; then
+            echo -n $l'.'
+          fi
+        done \
+        | sed 's/\.$//' 
       } \
-      | while read l; do
-        if echo "${l}" | grep -qE '[0-9]'; then
-          echo -n $l'.'
-        fi
-      done \
-      | sed 's/\.$//' \
       <<< "${old_tag}"
     )
     ;;
