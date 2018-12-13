@@ -65,7 +65,7 @@ function recurse {
       ;;
     1)
       eval git commit ${commit_args} || fail "commit"
-#      git_tag_increment "${level}" || fail "tag"
+      git_tag_increment "${level}" || fail "tag"
       git add . || fail "add files"
       git diff-index --quiet HEAD
       case $? in

@@ -71,7 +71,7 @@ for t in api_tests.d/*; do
   let test_count++
   cwd=$(pwd)
   refresh_test_dir > /dev/null 2>&1
-  if source "${t}" > /dev/null 2>&1; then
+  if source "${t}"; then
     success_count=$(( success_count + 1 ))
   else
     failure_count=$(( failure_count + 1 ))
@@ -79,6 +79,5 @@ for t in api_tests.d/*; do
   cd $cwd
 done
 
-echo "total"
 echo "Success:  ${success_count}/${test_count}"
 echo "Failures: ${failure_count}/${test_count}"

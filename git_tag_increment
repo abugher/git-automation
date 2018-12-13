@@ -13,10 +13,11 @@ arg="${1}"
 
 old_tag=$(
   git tag \
-    | grep -E '^[0-9]+\.^[0-9]+\.^[0-9]+$' \
+    | grep -E '^[0-9]+\.[0-9]+\.[0-9]+$' \
     | sort -V \
     | tail -n 1
 )
+echo "DEBUG:  old_tag=${old_tag}"
 
 if test '' == "${old_tag}"; then
   old_tag=0.0.0
@@ -66,61 +67,67 @@ fi
 case "${level}" in
   major)
     tag=$(
-      sed 's/\./\n/g' \
-      | { 
-        readarray tag_parts
-        let tag_parts[0]++
-        tag_parts[1]=0
-        tag_parts[2]=0
-        for part in "${tag_parts[@]}"; do
-          echo "${part}"
-        done
+      {
+        sed 's/\./\n/g' \
+        | { 
+          readarray tag_parts
+          let tag_parts[0]++
+          tag_parts[1]=0
+          tag_parts[2]=0
+          for part in "${tag_parts[@]}"; do
+            echo "${part}"
+          done
+        } \
+        | while read l; do
+          if echo "${l}" | grep -qE '[0-9]'; then
+            echo -n $l'.'
+          fi
+        done \
+        | sed 's/\.$//' 
       } \
-      | while read l; do
-        if echo "${l}" | grep -qE '[0-9]'; then
-          echo -n $l'.'
-        fi
-      done \
-      | sed 's/\.$//' \
       <<< "${old_tag}"
     )
     ;;
   minor)
     tag=$(
-      sed 's/\./\n/g' \
-      | { 
-        readarray tag_parts
-        let tag_parts[1]++
-        tag_parts[2]=0
-        for part in "${tag_parts[@]}"; do
-          echo "${part}"
-        done
+      {
+        sed 's/\./\n/g' \
+        | { 
+          readarray tag_parts
+          let tag_parts[1]++
+          tag_parts[2]=0
+          for part in "${tag_parts[@]}"; do
+            echo "${part}"
+          done
+        } \
+        | while read l; do
+          if echo "${l}" | grep -qE '[0-9]'; then
+            echo -n $l'.'
+          fi
+        done \
+        | sed 's/\.$//' 
       } \
-      | while read l; do
-        if echo "${l}" | grep -qE '[0-9]'; then
-          echo -n $l'.'
-        fi
-      done \
-      | sed 's/\.$//' \
       <<< "${old_tag}"
     )
     ;;
   patch)
     tag=$(
-      sed 's/\./\n/g' \
-      | { 
-        readarray tag_parts
-        let tag_parts[2]++
-        for part in "${tag_parts[@]}"; do
-          echo "${part}"
-        done
+      {
+        sed 's/\./\n/g' \
+        | { 
+          readarray tag_parts
+          let tag_parts[2]++
+          for part in "${tag_parts[@]}"; do
+            echo "${part}"
+          done
+        } \
+        | while read l; do
+          if echo "${l}" | grep -qE '[0-9]'; then
+            echo -n $l'.'
+          fi
+        done \
+        | sed 's/\.$//' 
       } \
-      | while read l; do
-        if echo "${l}" | grep -qE '[0-9]'; then
-          echo -n $l'.'
-        fi
-      done \
-      | sed 's/\.$//' \
       <<< "${old_tag}"
     )
     ;;
