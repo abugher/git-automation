@@ -1,1 +1,135 @@
-git_tag_increment.future
+#!/bin/bash
+
+shopt -s expand_aliases
+alias unpath="sed 's#^.*/##g'"
+
+
+fail() {
+  echo "ERROR:  ${1}" >&2
+  exit 1
+}
+
+
+arg="${1}"
+
+old_tag=$(
+  git tag \
+    | grep -E '^[0-9]+\.[0-9]+\.[0-9]+$' \
+    | sort -V \
+    | tail -n 1
+)
+
+if test '' == "${old_tag}"; then
+  old_tag=0.0.0
+fi
+
+level='patch'
+
+minor=0
+major=0
+if test 'automatic' == "${arg:-automatic}"; then
+  while read operation; do
+    case $operation in
+      M)
+        minor=1
+        ;;
+      A)
+        minor=1
+        ;;
+      D)
+        major=1
+        ;;
+      '')
+        ;;
+      *)
+        fail "Unrecognized git operation code:  '${operation}'"
+        ;;
+    esac
+  done <<< "$(
+    git diff-index HEAD \
+    | awk '/api_tests\.d\// {print $5}'
+  )"
+  if test 1 -eq $minor; then
+    level='minor'
+  fi
+  if test 1 -eq $major; then
+    level='major'
+  fi
+else
+  level="${arg}"
+fi
+
+case "${level}" in
+  major)
+    tag=$(
+      {
+        sed 's/\./\n/g' \
+        | { 
+          readarray tag_parts
+          let tag_parts[0]++
+          tag_parts[1]=0
+          tag_parts[2]=0
+          for part in "${tag_parts[@]}"; do
+            echo "${part}"
+          done
+        } \
+        | while read l; do
+          if echo "${l}" | grep -qE '[0-9]'; then
+            echo -n $l'.'
+          fi
+        done \
+        | sed 's/\.$//' 
+      } \
+      <<< "${old_tag}"
+    )
+    ;;
+  minor)
+    tag=$(
+      {
+        sed 's/\./\n/g' \
+        | { 
+          readarray tag_parts
+          let tag_parts[1]++
+          tag_parts[2]=0
+          for part in "${tag_parts[@]}"; do
+            echo "${part}"
+          done
+        } \
+        | while read l; do
+          if echo "${l}" | grep -qE '[0-9]'; then
+            echo -n $l'.'
+          fi
+        done \
+        | sed 's/\.$//' 
+      } \
+      <<< "${old_tag}"
+    )
+    ;;
+  patch)
+    tag=$(
+      {
+        sed 's/\./\n/g' \
+        | { 
+          readarray tag_parts
+          let tag_parts[2]++
+          for part in "${tag_parts[@]}"; do
+            echo "${part}"
+          done
+        } \
+        | while read l; do
+          if echo "${l}" | grep -qE '[0-9]'; then
+            echo -n $l'.'
+          fi
+        done \
+        | sed 's/\.$//' 
+      } \
+      <<< "${old_tag}"
+    )
+    ;;
+  *)
+    fail "Unrecognized level:  ${level}"
+    ;;
+esac
+
+echo "${level}" > /tmp/level.txt
+git tag -a "${tag}" -m "Automatic ${level} increment."
