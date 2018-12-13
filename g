@@ -59,29 +59,17 @@ function recurse {
   git add -u . || fail "remove files"
 
   git diff-index --quiet HEAD
-  case $? in
+  ret=$?
+  case $ret in
     0)
       true
       ;;
     1)
-      eval git commit ${commit_args} || fail "commit"
       git_tag_increment "${level}" || fail "tag"
-      git add . || fail "add files"
-      git diff-index --quiet HEAD
-      case $? in
-        0)
-          true
-          ;;
-        1)
-          eval git commit ${commit_args} -m "'Posting old test files for comparison.'" || fail "commit"
-          ;;
-        *)
-          fail "check for old test files to commit"
-          ;;
-      esac
+      eval git commit ${commit_args} || fail "commit"
       ;;
     *)
-      fail "check for changes to commit"
+      fail "unrecognized return code from git diff-index:  ${ret}"
   esac
 
   git checkout master || fail "checkout master"
