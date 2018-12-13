@@ -79,6 +79,5 @@ for t in api_tests.d/*; do
   cd $cwd
 done
 
-echo "total"
 echo "Success:  ${success_count}/${test_count}"
 echo "Failures: ${failure_count}/${test_count}"
