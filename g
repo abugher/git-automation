@@ -48,8 +48,7 @@ function recurse {
     fi
   ); do 
     if ! test -d "${subproject}/.git"; then
-      git rm --cached "${subproject}"
-      git add "${subproject}"
+      git submodule update "${subproject}"
     fi
     echo "Enter subproject:  ${subproject}"
     cd $subproject || fail "enter subproject directory:  ${subproject}"
