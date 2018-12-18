@@ -58,6 +58,7 @@ function recurse {
     echo "Leave subproject:  ${subproject}"
   done
 
+  git pull || fail "pull"
   git add . || fail "add files"
   git add -u . || fail "remove files"
 
@@ -79,7 +80,6 @@ function recurse {
 
   git push || fail "push"
   git push --tags || fail "push tags"
-  git pull || fail "pull"
   git submodule update || fail "update"
   git tag | sort -V | tail -n 1 || fail "display current version"
 }
