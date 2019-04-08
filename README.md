@@ -1,4 +1,4 @@
-g [{automatic|patch|minor|major} commit_message]
+g [commit_message [automatic|patch|minor|major]]
   
   "Don't make me think; do git stuff."  
   
@@ -21,9 +21,3 @@ git_tag_increment [automatic|patch|minor|major]
   changed, the minor number is incremented.  If tests have been removed, the
   major number is incremented.  If a valid argument is specified, it is used
   as the change level, overriding any automatic determination.
-
-
-BUGS:
-
-  You shouldn't really have to specify the revision level to 'g' in order to
-  specify the commit message.

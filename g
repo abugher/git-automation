@@ -1,6 +1,7 @@
 #!/bin/bash
 
-l="${1}"
+l="${2}"
+message="${1}"
 
 case "${l}" in
   'patch')
@@ -25,7 +26,6 @@ case "${l}" in
 esac
 
 commit_args=''
-message="${2}"
 if echo "${message}" | grep -q '.'; then
   commit_args="-m '${message}'"
 fi

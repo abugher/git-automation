@@ -1,7 +1,7 @@
 cd "${main_sub_repo}"
 touch thing1
-g automatic "No comment." > "${output_dir}/4.1.txt" 2>&1 || return 1
+g "No comment." automatic > "${output_dir}/4.1.txt" 2>&1 || return 1
 
 cd "${sub_sub_repo}"
 touch thing2
-g automatic "No comment." > "${output_dir}/4.2.txt" 2>&1 || return 2
+g "No comment." automatic > "${output_dir}/4.2.txt" 2>&1 || return 2
