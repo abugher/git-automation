@@ -27,7 +27,7 @@ esac
 
 commit_args=''
 if echo "${message}" | grep -q '.'; then
-  commit_args="-m '${message}'"
+  commit_args="-m '$(sed "s/'/'\"'\"'/g" <<< ${message})'"
 fi
 
 
