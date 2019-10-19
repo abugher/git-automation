@@ -41,16 +41,18 @@ function fail {
 function recurse {
   git submodule init
 
-  for subproject in $(
+  for s in $(
     if test -f .gitmodules; then
       grep -E '^\spath = ' .gitmodules \
       | sed 's/^\spath = //'
     fi
   ); do 
+    local subproject=$s
     echo "Enter subproject:  ${subproject}"
+    local oldpwd=$PWD
     cd $subproject || fail "enter subproject directory:  ${subproject}"
     recurse || fail "recurse"
-    cd - || fail "leave subproject directory:  ${subproject}"
+    cd $oldpwd || fail "leave subproject directory:  ${subproject}"
     git add $subproject || fail "git add ${subproject} # submodule"
     echo "Leave subproject:  ${subproject}"
   done
