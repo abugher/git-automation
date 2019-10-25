@@ -48,13 +48,13 @@ function recurse {
     fi
   ); do 
     local subproject=$s
-    echo "Enter subproject:  ${subproject}"
+    echo "Begin subproject:  ${subproject}"
     local oldpwd=$PWD
-    cd $subproject || fail "enter subproject directory:  ${subproject}"
+    cd $subproject || fail "Enter subproject directory:  ${subproject}"
     recurse || fail "recurse"
-    cd $oldpwd || fail "leave subproject directory:  ${subproject}"
+    cd $oldpwd || fail "Leave subproject directory:  ${subproject}"
     git add $subproject || fail "git add ${subproject} # submodule"
-    echo "Leave subproject:  ${subproject}"
+    echo "End subproject:  ${subproject}"
   done
 
   git pull || fail "pull"
