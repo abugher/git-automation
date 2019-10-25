@@ -39,7 +39,10 @@ function fail {
 
 
 function recurse {
-  git submodule init
+  if git diff --quiet --exit-code; then
+    git checkout master || fail "checkout master"
+  fi
+  git submodule init || fail "submodule init"
 
   for s in $(
     if test -f .gitmodules; then
