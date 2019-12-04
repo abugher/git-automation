@@ -39,6 +39,7 @@ function fail {
 
 
 function recurse {
+  recurse_pids=()
   if git diff --quiet --exit-code; then
     git checkout master || fail "checkout master"
   fi
@@ -51,13 +52,20 @@ function recurse {
     fi
   ); do 
     local subproject=$s
-    echo "Begin subproject:  ${subproject}"
-    local oldpwd=$PWD
-    cd $subproject || fail "Enter subproject directory:  ${subproject}"
-    recurse || fail "recurse"
-    cd $oldpwd || fail "Leave subproject directory:  ${subproject}"
-    git add $subproject || fail "git add ${subproject} # submodule"
-    echo "End subproject:  ${subproject}"
+    {
+      echo "Begin subproject:  ${subproject}"
+      local oldpwd=$PWD
+      cd $subproject || fail "Enter subproject directory:  ${subproject}"
+      recurse
+      cd $oldpwd || fail "Leave subproject directory:  ${subproject}"
+      git add $subproject || fail "git add ${subproject} # submodule"
+      echo "End subproject:  ${subproject}"
+    } &
+    recurse_pids+=( $! )
+  done
+
+  for recurse_pid in "${recurse_pids[@]}"; do
+    wait -f "${recurse_pid}" || fail "A forked process has failed."
   done
 
   git pull || fail "pull"
