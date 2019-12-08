@@ -69,8 +69,8 @@ function submodules {
 
 function phase1 {
   if git diff --quiet --exit-code >/dev/null 2>&1; then
-    # Without the sleep, locking errors occur on:  .git/index.lock
-    #sleep .1
+    # Locking errors occur on:  .git/index.lock
+    # Cause unknown.  'git checkout' returns:  128
     i=0
     git_checkout_ret=128
     while test $git_checkout_ret -eq 128; do
@@ -78,7 +78,7 @@ function phase1 {
       if test $i -gt 5; then
         fail "Locked up."
       fi
-      git checkout master >/dev/null 2>&1
+      git checkout master >/dev/null 2>&1 && break
       git_checkout_ret=$?
       sleep .1
     done
