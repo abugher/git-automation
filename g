@@ -82,9 +82,6 @@ function phase1 {
       fi
       git checkout master >/dev/null 2>&1
       git_checkout_ret=$?
-      if ! test 0 -eq $git_checkout_ret; then
-        debug "git_checkout_ret=${git_checkout_ret}; i=${i}"
-      fi
       sleep .1
     done
   fi
