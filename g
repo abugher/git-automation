@@ -1,7 +1,11 @@
 #!/bin/bash
 
+GIT_OPTIONAL_LOCKS=0
+
 l="${2}"
 message="${1}"
+
+unset background
 
 case "${l}" in
   'patch')
@@ -26,74 +30,190 @@ case "${l}" in
 esac
 
 commit_args=''
-if echo "${message}" | grep -q '.'; then
+if grep -q '.' <<< "${message}"; then
   commit_args="-m '$(sed "s/'/'\"'\"'/g" <<< ${message})'"
 fi
 
 
-function fail {
-  ret=$?
-  echo "Failed:  ${1}" >&2
-  exit $ret
+function output {
+  printf "%10s:  %s\n" "(${project})" "${1}"
 }
 
 
-function recurse {
-  recurse_pids=()
-  if git diff --quiet --exit-code; then
-    git checkout master || fail "checkout master"
+function warn {
+  output "WARNING: ${1}" >&2
+}
+
+
+function error {
+  output "ERROR:   ${1}" >&2
+}
+
+
+function fail {
+  error "${1}"
+  exit $2
+}
+
+
+function debug {
+  #output "DEBUG:   ${1}" >&2
+  true
+}
+
+
+function submodules {
+  if test -f .gitmodules; then
+    grep -E '^\spath = ' .gitmodules \
+    | sed 's/^\spath = //'
   fi
-  git submodule init || fail "submodule init"
+}
 
-  for s in $(
-    if test -f .gitmodules; then
-      grep -E '^\spath = ' .gitmodules \
-      | sed 's/^\spath = //'
-    fi
-  ); do 
-    local subproject=$s
-    {
-      echo "Begin subproject:  ${subproject}"
-      local oldpwd=$PWD
-      cd $subproject || fail "Enter subproject directory:  ${subproject}"
-      recurse
-      cd $oldpwd || fail "Leave subproject directory:  ${subproject}"
-      git add $subproject || fail "git add ${subproject} # submodule"
-      echo "End subproject:  ${subproject}"
-    } &
-    recurse_pids+=( $! )
+
+function phase1 {
+  if git diff --quiet --exit-code >/dev/null 2>&1; then
+    # Sometimes .git/index.lock is present.  Don't know why.  Retry as
+    # necessary.  (Crude.)
+    checkout_ret=128
+    i=0
+    while test 128 = "${checkout_ret}"; do
+      i=$((i+1))
+      if test $i -gt 10; then
+        fail "checkout failed - git locked"
+      fi
+      sleep .1
+      git checkout master >/dev/null 2>&1 || fail "(${project}) checkout master ($?)"
+      checkout_ret=$?
+    done
+  fi
+  git submodule init >/dev/null 2>&1 || fail "submodule init"
+}
+
+
+function phase2 {
+  git pull >/dev/null 2>&1 || fail "pull"
+  git add . >/dev/null 2>&1 || fail "add files"
+  git add -u . >/dev/null 2>&1 || fail "remove files"
+}
+
+
+function phase3 {
+  git_tag_increment "${level}" || fail "tag"
+  eval git commit ${commit_args} || fail "commit"
+}
+
+
+function phase4 {
+  git checkout master >/dev/null 2>&1 || fail "checkout master"
+  git push >/dev/null 2>&1 || fail "push"
+  git push --tags >/dev/null 2>&1 || fail "push tags"
+  git submodule update >/dev/null 2>&1 || fail "update"
+  if ! test 'set' = "${background:+set}"; then
+    echo -n "($project):  "
+    git tag | sort -V | tail -n 1 || fail "display current version"
+  fi
+}
+
+
+function subproject {
+  ret=0
+  subproject=$1
+  if test 'set' = "${2:+set}"; then
+    background="${2}"
+  fi
+
+  local oldpwd=$PWD
+  cd $subproject || fail "Enter subproject directory:  ${subproject}"
+  if test 'set' = "${background:+set}"; then
+    project background &
+    pid=$!
+  else
+    project
+    ret=$?
+  fi
+  cd $oldpwd || fail "Leave subproject directory:  ${subproject}"
+
+  git add $subproject >/dev/null 2>&1 || fail "git add ${subproject} # submodule"
+
+  unset background
+  return $ret
+}
+
+
+function project {
+  project="${subproject:-[top]}"
+  subproject_pids=()
+  remedial_subprojects=()
+  declare -A subprojects_by_pid
+  ret=0
+  if test 'set' = "${2:+set}"; then
+    background="${2}"
+  fi
+
+  debug "Begin project.  ${background:+ (background)}"
+
+  phase1
+
+  for subproject in $(submodules); do 
+    unset pid
+    subproject $subproject background
+    test 'set' = "${pid:+set}" || fail "No PID set for subproject:  ${subproject}"
+    subproject_pids+=( $pid )
+    subprojects_by_pid[pid$pid]="${subproject}"
   done
 
-  for recurse_pid in "${recurse_pids[@]}"; do
-    wait -f "${recurse_pid}" || fail "A forked process has failed."
+  for subproject_pid in "${subproject_pids[@]}"; do
+    subproject="${subprojects_by_pid[pid$subproject_pid]}"
+    wait -f "${subproject_pid}" 
+    subproject_ret=$?
+    case $subproject_ret in
+      0)
+        true
+        ;;
+      2)
+        # It may be more efficient to pass back a list of changed
+        # sub-(sub-)projects, and only act on those directories.
+        if test 'set' = "${background:+set}"; then
+          ret=2
+        else
+          remedial_subprojects+=( $subproject )
+        fi
+        ;;
+      *)
+        fail "A forked process has failed:  (${subproject}) (${subproject_ret})"
+        ;;
+    esac
   done
 
-  git pull || fail "pull"
-  git add . || fail "add files"
-  git add -u . || fail "remove files"
+  for subproject in "${remedial_subprojects[@]}"; do
+    subproject $subproject || fail "Subproject:  ${subproject}"
+  done
+
+  phase2
 
   git diff-index --quiet HEAD
-  ret=$?
-  case $ret in
+  git_diff_index_ret=$?
+  case $git_diff_index_ret in
     0)
-      true
+      phase4
       ;;
     1)
-      git_tag_increment "${level}" || fail "tag"
-      eval git commit ${commit_args} || fail "commit"
+      if ! test 'set' = "${background:+set}"; then
+        phase3
+        phase4
+      else
+        # Alert parent to try again in foreground.
+        debug "There are changes to commit.  Notifying parent."
+        ret=2
+      fi
       ;;
     *)
       fail "unrecognized return code from git diff-index:  ${ret}"
   esac
 
-  git checkout master || fail "checkout master"
-
-  git push || fail "push"
-  git push --tags || fail "push tags"
-  git submodule update || fail "update"
-  git tag | sort -V | tail -n 1 || fail "display current version"
+  debug "End project.  ${background:+ (background)} (${ret})"
+  return $ret
 }
 
 
-recurse
-
+project
