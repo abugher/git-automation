@@ -36,29 +36,28 @@ fi
 
 
 function output {
-  printf "%10s:  %s\n" "(${project})" "${1}"
+  printf "%10s (%s):  %s\n" "(${project})" "${background:-}" "${1}"
 }
 
 
 function warn {
-  output "WARNING: ${1}" >&2
+  output "WARNING: (${?}) ${1}" >&2
 }
 
 
 function error {
-  output "ERROR:   ${1}" >&2
+  output "ERROR:   (${?}) ${1}" >&2
 }
 
 
 function fail {
   error "${1}"
-  exit $2
+  exit "${2:-1}"
 }
 
 
 function debug {
-  #output "DEBUG:   ${1}" >&2
-  true
+  output "DEBUG:   (${?}) ${1}" >&2
 }
 
 
@@ -72,8 +71,6 @@ function submodules {
 
 function phase1 {
   if git diff --quiet --exit-code >/dev/null 2>&1; then
-    # Sometimes .git/index.lock is present.  Don't know why.  Retry as
-    # necessary.  (Crude.)
     checkout_ret=128
     i=0
     while test 128 = "${checkout_ret}"; do
@@ -82,8 +79,12 @@ function phase1 {
         fail "checkout failed - git locked"
       fi
       sleep .1
-      git checkout master >/dev/null 2>&1 || fail "(${project}) checkout master ($?)"
+      git checkout master >/dev/null 2>&1 || fail "checkout master (phase 1)"
+      #git checkout master || fail "checkout master (phase 1)"
       checkout_ret=$?
+      if ! test 0 -eq $checkout_ret; then
+        debug "checkout_ret=${checkout_ret}"
+      fi
     done
   fi
   git submodule init >/dev/null 2>&1 || fail "submodule init"
@@ -104,12 +105,12 @@ function phase3 {
 
 
 function phase4 {
-  git checkout master >/dev/null 2>&1 || fail "checkout master"
+  git checkout master >/dev/null 2>&1 || fail "checkout master (phase 4)"
   git push >/dev/null 2>&1 || fail "push"
   git push --tags >/dev/null 2>&1 || fail "push tags"
   git submodule update >/dev/null 2>&1 || fail "update"
   if ! test 'set' = "${background:+set}"; then
-    echo -n "($project):  "
+    echo -n "${project}:  "
     git tag | sort -V | tail -n 1 || fail "display current version"
   fi
 }
@@ -119,7 +120,7 @@ function subproject {
   ret=0
   subproject=$1
   if test 'set' = "${2:+set}"; then
-    background="${2}"
+    local background="${2}"
   fi
 
   local oldpwd=$PWD
@@ -135,7 +136,6 @@ function subproject {
 
   git add $subproject >/dev/null 2>&1 || fail "git add ${subproject} # submodule"
 
-  unset background
   return $ret
 }
 
@@ -147,10 +147,8 @@ function project {
   declare -A subprojects_by_pid
   ret=0
   if test 'set' = "${2:+set}"; then
-    background="${2}"
+    local background="${2}"
   fi
-
-  debug "Begin project.  ${background:+ (background)}"
 
   phase1
 
@@ -203,7 +201,6 @@ function project {
         phase4
       else
         # Alert parent to try again in foreground.
-        debug "There are changes to commit.  Notifying parent."
         ret=2
       fi
       ;;
@@ -211,7 +208,6 @@ function project {
       fail "unrecognized return code from git diff-index:  ${ret}"
   esac
 
-  debug "End project.  ${background:+ (background)} (${ret})"
   return $ret
 }
 
