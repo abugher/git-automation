@@ -1,7 +1,5 @@
 #!/bin/bash
 
-GIT_OPTIONAL_LOCKS=0
-
 l="${2}"
 message="${1}"
 
