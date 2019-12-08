@@ -71,20 +71,21 @@ function submodules {
 
 function phase1 {
   if git diff --quiet --exit-code >/dev/null 2>&1; then
-    checkout_ret=128
+    # Without the sleep, locking errors occur on:  .git/index.lock
+    #sleep .1
     i=0
-    while test 128 = "${checkout_ret}"; do
+    git_checkout_ret=128
+    while test $git_checkout_ret -eq 128; do
       i=$((i+1))
-      if test $i -gt 10; then
-        fail "checkout failed - git locked"
+      if test $i -gt 5; then
+        fail "Locked up."
+      fi
+      git checkout master >/dev/null 2>&1
+      git_checkout_ret=$?
+      if ! test 0 -eq $git_checkout_ret; then
+        debug "git_checkout_ret=${git_checkout_ret}; i=${i}"
       fi
       sleep .1
-      git checkout master >/dev/null 2>&1 || fail "checkout master (phase 1)"
-      #git checkout master || fail "checkout master (phase 1)"
-      checkout_ret=$?
-      if ! test 0 -eq $checkout_ret; then
-        debug "checkout_ret=${checkout_ret}"
-      fi
     done
   fi
   git submodule init >/dev/null 2>&1 || fail "submodule init"
