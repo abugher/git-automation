@@ -130,8 +130,6 @@ function subproject {
   fi
   cd $oldpwd || fail "Leave subproject directory:  ${subproject}"
 
-  git add $subproject >/dev/null 2>&1 || fail "git add ${subproject} # submodule"
-
   return $ret
 }
 
@@ -183,6 +181,11 @@ function project {
     subproject $subproject || fail "Subproject:  ${subproject}"
   done
 
+  for subproject_pid in "${subproject_pids[@]}"; do
+    subproject="${subprojects_by_pid[pid$subproject_pid]}"
+    git add $subproject >/dev/null 2>&1 || fail "git add ${subproject} # submodule"
+  done
+
   phase2
 
   git diff-index --quiet HEAD
@@ -208,4 +211,4 @@ function project {
 }
 
 
-time project
+project
