@@ -211,4 +211,4 @@ function project {
 }
 
 
-project
+time project
