@@ -2,14 +2,11 @@ g [commit_message [automatic|patch|minor|major]]
   
   "Don't make me think; do git stuff."  
   
-  This command will pull any upstream changes, add or remove, commit, and push
-  any changed files, including subprojects, in this repo and any subprojects,
-  recursively, depth first.
+  This command will pull any changes from upstream, then add, commit, and push
+  any changes from your repo, including subprojects, in this repo and any
+  subprojects, recursively, depth first.
 
-  You made some changes?  They should get pushed upstream.  You want the latest
-  from upstream?  You should get it.
-
-  It also calls git_tag_increment.
+  It also runs git_tag_increment.
 
 
 git_tag_increment [automatic|patch|minor|major]
