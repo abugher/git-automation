@@ -3,10 +3,9 @@
 *Don't make me think; do git stuff.*
 
 This command will pull any changes from upstream, then add, commit, and push
-any changes from your repo, including subprojects, in this repo and any
-subprojects, recursively, depth first.
+any changes from this repo and any subprojects, recursively, depth first.
 
-It also runs git_tag_increment.
+It also runs *git_tag_increment*.
 
 
 **git_tag_increment [automatic|patch|minor|major]**
