@@ -1,0 +1,19 @@
+#!/bin/bash
+#
+# This script was derived on 2021-01-09 from the post made by user "Vi." at
+# https://stackoverflow.com/a/14329983/9116257, posted on 2013-01-15, edited on
+# 2017-07-28, and is released under CC-BY-SA 3.0.  See LICENSE for more
+# information.
+
+
+git rev-list --all --objects | \
+    sed -n $(git rev-list --objects --all | \
+    cut -f1 -d' ' | \
+    git cat-file --batch-check | \
+    grep blob | \
+    sort -n -k 3 | \
+    tail -n40 | \
+    while read hash type size; do 
+         echo -n "-e s/$hash/$size/p ";
+    done) | \
+    sort -n -k1
