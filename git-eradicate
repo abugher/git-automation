@@ -5,11 +5,44 @@
 # 2017-07-28, and is released under CC-BY-SA 3.0.  See LICENSE for more
 # information.
 
-git filter-branch -f  --index-filter \
-    'git rm --force --cached --ignore-unmatch video/parasite-intro.avi' \
-     -- --all
-rm -Rf .git/refs/original && \
-    git reflog expire --expire=now --all && \
-    git gc --aggressive && \
-    git prune
 
+function main() {
+  if test 1 -gt "${#}"; then
+    fail "Supply some paths to eradicate as arguments."
+  fi
+
+  targets=( "${@}" )
+  target_string=
+  for target in "${targets[@]}"; do
+    target_string="${target_string} '${target}'"
+  done
+
+  size_before="$(du --si -s | cut -f 1)"
+
+  git filter-branch \
+    -f \
+    --tag-name-filter cat \
+    --index-filter "git rm -rf --cached --ignore-unmatch ${target_string}" \
+    -- --all \
+    || fail "Phase 1 failed." "${?}"
+
+  rm -rf .git/refs/original \
+    && git reflog expire --expire=now --all \
+    && git gc --aggressive \
+    && git prune \
+    || fail "Phase 2 failed." "${?}"
+
+  size_after="$(du --si -s | cut -f 1)"
+
+  printf "Size before:  %s\n" "${size_before}"
+  printf "Size after:   %s\n" "${size_after}"
+}
+
+
+function fail() {
+  printf 'ERROR:  %s\n' "${1}"
+  exit "${2:-1}"
+}
+
+
+time main "${@}"
