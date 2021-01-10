@@ -73,13 +73,13 @@ function phase1 {
     # Cause unknown.  'git checkout' returns:  128
     i=0
     git_checkout_ret=128
-    while test $git_checkout_ret -eq 128; do
-      i=$((i+1))
-      if test $i -gt 5; then
+    while test 128 -eq "${git_checkout_ret}"; do
+      i="$(( i + 1 ))"
+      if test 5 -lt "${i}"; then
         fail "Locked up."
       fi
       git checkout master >/dev/null 2>&1 && break
-      git_checkout_ret=$?
+      git_checkout_ret="${?}"
       sleep .1
     done
   fi
@@ -96,6 +96,7 @@ function phase2 {
 
 function phase3 {
   git_tag_increment "${level}" || fail "tag"
+  # No quotes.
   eval git commit ${commit_args} || fail "commit"
 }
 
@@ -119,18 +120,18 @@ function subproject {
     local background="${2}"
   fi
 
-  local oldpwd=$PWD
-  cd $subproject || fail "Enter subproject directory:  ${subproject}"
+  local oldpwd="${PWD}"
+  cd "${subproject}" || fail "Enter subproject directory:  ${subproject}"
   if test 'set' = "${background:+set}"; then
     project background &
-    pid=$!
+    pid="${!}"
   else
     project
-    ret=$?
+    ret="${?}"
   fi
-  cd $oldpwd || fail "Leave subproject directory:  ${subproject}"
+  cd "${oldpwd}" || fail "Leave subproject directory:  ${subproject}"
 
-  return $ret
+  return "${ret}"
 }
 
 
@@ -140,6 +141,7 @@ function project {
   subdir_pids=()
   remedial_subprojects=()
   declare -A subprojects_by_pid
+  declare -A subdirs_by_pid
   ret=0
   if test 'set' = "${2:+set}"; then
     local background="${2}"
@@ -147,27 +149,35 @@ function project {
 
   phase1
 
-  for subproject in $(submodules); do 
+  while read subproject; do
     unset pid
-    subproject $subproject background
+    subproject "${subproject}" background
     test 'set' = "${pid:+set}" || fail "No PID set for subproject:  ${subproject}"
-    subproject_pids+=( $pid )
+    subproject_pids+=( "${pid}" )
     subprojects_by_pid[pid$pid]="${subproject}"
-  done
+  done < <(submodules)
 
-  for subdir in $(ls -d sensitive_* 2>/dev/null); do
+  while read subdir; do
     unset pid
-    subproject $subdir background
-    test 'set' = "${pid:+set}" || fail "No PID set for subproject:  ${subproject}"
-    subdir_pids+=( $pid )
-    subdirs_by_pid[pid$pid]="${subproject}"
-  done
+    subproject "${subdir}" background
+    test 'set' = "${pid:+set}" || fail "No PID set for subdir:  ${subdir}"
+    subdir_pids+=( "${pid}" )
+    subdirs_by_pid[pid$pid]="${subdir}"
+  done < <(
+    if test -f .gitignore; then
+      ls -d $(cat .gitignore) 2>/dev/null | while read d; do
+        if test -d "${d}"; then
+          echo "${d}"
+        fi
+      done
+    fi
+  )
 
-  for subproject_pid in "${subproject_pids[@]}" "${subdir_pids[@]}"; do
-    subproject="${subprojects_by_pid[pid$subproject_pid]}"
-    wait -f "${subproject_pid}" 
-    subproject_ret=$?
-    case $subproject_ret in
+  for subdir_pid in "${subdir_pids[@]}"; do
+    subdir="${subdirs_by_pid[pid$subdir_pid]}"
+    wait -f "${subdir_pid}"
+    subdir_ret="${?}"
+    case "${subdir_ret}" in
       0)
         true
         ;;
@@ -177,7 +187,30 @@ function project {
         if test 'set' = "${background:+set}"; then
           ret=2
         else
-          remedial_subprojects+=( $subproject )
+          remedial_subprojects+=( "${subdir}" )
+        fi
+        ;;
+      *)
+        fail "A forked process has failed:  (${subdir}) (${subdir_ret})"
+        ;;
+    esac
+  done
+
+  for subproject_pid in "${subproject_pids[@]}"; do
+    subproject="${subprojects_by_pid[pid$subproject_pid]}"
+    wait -f "${subproject_pid}" 
+    subproject_ret="${?}"
+    case "${subproject_ret}" in
+      0)
+        true
+        ;;
+      2)
+        # It may be more efficient to pass back a list of changed
+        # sub-(sub-)projects, and only act on those directories.
+        if test 'set' = "${background:+set}"; then
+          ret=2
+        else
+          remedial_subprojects+=( "${subproject}" )
         fi
         ;;
       *)
@@ -187,19 +220,19 @@ function project {
   done
 
   for subproject in "${remedial_subprojects[@]}"; do
-    subproject $subproject || fail "Subproject:  ${subproject}"
+    subproject "${subproject}" || fail "Subproject:  ${subproject}"
   done
 
   for subproject_pid in "${subproject_pids[@]}"; do
     subproject="${subprojects_by_pid[pid$subproject_pid]}"
-    git add $subproject >/dev/null 2>&1 || fail "git add ${subproject} # submodule"
+    git add "${subproject}" >/dev/null 2>&1 || fail "git add ${subproject} # submodule"
   done
 
   phase2
 
   git diff-index --quiet HEAD
   git_diff_index_ret=$?
-  case $git_diff_index_ret in
+  case "${git_diff_index_ret}" in
     0)
       phase4
       ;;
@@ -216,7 +249,7 @@ function project {
       fail "unrecognized return code from git diff-index:  ${ret}"
   esac
 
-  return $ret
+  return "${ret}"
 }
 
 
