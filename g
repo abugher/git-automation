@@ -137,6 +137,7 @@ function subproject {
 function project {
   project="${subproject:-[top]}"
   subproject_pids=()
+  subdir_pids=()
   remedial_subprojects=()
   declare -A subprojects_by_pid
   ret=0
@@ -146,7 +147,7 @@ function project {
 
   phase1
 
-  for subproject in $(submodules) $(ls -d sensitive_* 2>/dev/null); do 
+  for subproject in $(submodules); do 
     unset pid
     subproject $subproject background
     test 'set' = "${pid:+set}" || fail "No PID set for subproject:  ${subproject}"
@@ -154,7 +155,15 @@ function project {
     subprojects_by_pid[pid$pid]="${subproject}"
   done
 
-  for subproject_pid in "${subproject_pids[@]}"; do
+  for subdir in $(ls -d sensitive_* 2>/dev/null); do
+    unset pid
+    subproject $subdir background
+    test 'set' = "${pid:+set}" || fail "No PID set for subproject:  ${subproject}"
+    subdir_pids+=( $pid )
+    subdirs_by_pid[pid$pid]="${subproject}"
+  done
+
+  for subproject_pid in "${subproject_pids[@]}" "${subdir_pids[@]}"; do
     subproject="${subprojects_by_pid[pid$subproject_pid]}"
     wait -f "${subproject_pid}" 
     subproject_ret=$?
