@@ -146,7 +146,7 @@ function project {
 
   phase1
 
-  for subproject in $(submodules); do 
+  for subproject in $(submodules) $(ls -d sensitive_* 2>/dev/null); do 
     unset pid
     subproject $subproject background
     test 'set' = "${pid:+set}" || fail "No PID set for subproject:  ${subproject}"
