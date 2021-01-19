@@ -1,0 +1,20 @@
+#!/bin/bash
+
+# Find self.
+cd "${0%/*}/.."
+project="${PWD}"
+cd "${OLDPWD}"
+
+# Load libraries.
+libs=(
+  'test_vars'
+  'test_repo'
+  'test_main'
+)
+if ! . "${project}/lib/test_common.sh"; then
+  echo "Failed to load common dependencies." >&2
+  exit 1
+fi
+
+# Test.
+test_main

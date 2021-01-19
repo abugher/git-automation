@@ -1,29 +1,5 @@
 #!/bin/bash
 
-PATH="$HOME/code/github/abugher/git-automation:${PATH}"
-
-test_dir="/tmp/git-automation_tests"
-output_dir="/tmp/git-automation_tests_output"
-master_super_repo="${test_dir}/master_super"
-master_sub_repo="${test_dir}/master_sub"
-master_single_repo="${test_dir}/master_single"
-main_super_repo="${test_dir}/super"
-main_sub_repo="${test_dir}/sub"
-main_single_repo="${test_dir}/single"
-sub_repo_name='sub'
-sub_sub_repo="${main_super_repo}/${sub_repo_name}"
-old_cwd="${PWD}"
-
-test_count=0
-failure_count=0
-success_count=0
-
-
-function fail {
-  echo "Failure code:  (${1})" >&2
-  exit 1
-}
-
 
 function initialize_repo() {
   master=$1
@@ -42,7 +18,7 @@ function initialize_repo() {
 }
 
 
-refresh_test_dir() {
+function refresh_test_dir() {
   oldpwd=$PWD
   rm -rf "${test_dir}"
   mkdir "${test_dir}"
@@ -59,27 +35,3 @@ refresh_test_dir() {
   cd $oldpwd
 }
 
-
-rm -rf "${output_dir}"
-mkdir "${output_dir}"
-
-for t in tests/*; do
-  if test 'tests/*' == "${t}"; then
-    continue
-  fi
-  echo "Executing test:  ${t}"
-  let test_count++
-  cwd=$(pwd)
-  refresh_test_dir > /dev/null 2>&1
-  if source "${t}"; then
-    echo "Success:  ${test_count}:  ${t}"
-    success_count=$(( success_count + 1 ))
-  else
-    echo "Failure:  ${test_count}:  ${t} (${?})"
-    failure_count=$(( failure_count + 1 ))
-  fi
-  cd $cwd
-done
-
-echo "Success:  ${success_count}/${test_count}"
-echo "Failures: ${failure_count}/${test_count}"
