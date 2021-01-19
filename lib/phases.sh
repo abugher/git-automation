@@ -29,7 +29,7 @@ function phase2() {
 
 
 function phase3() {
-  git_tag_increment "${level}" || fail "tag"
+  "${git_automation}/bin/git_tag_increment" "${level}" || fail "tag"
   # No quotes.
   eval git commit ${commit_args} || fail "commit"
 }
