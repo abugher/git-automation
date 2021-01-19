@@ -8,6 +8,7 @@ cd "${OLDPWD}"
 
 # Load libraries.
 libs=(
+  'vars'
   'projects'
   'phases'
   'main'
