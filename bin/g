@@ -1,21 +1,21 @@
 #!/bin/bash
 
+
 # Find self.
 cd "${0%/*}/.."
-project="${PWD}"
+git_automation="${PWD}"
 cd "${OLDPWD}"
 
 # Load libraries.
 libs=(
-  'test_vars'
-  'test_repo'
-  'test_get_version'
-  'test_main'
+  'projects'
+  'phases'
+  'main'
 )
-if ! . "${project}/lib/test_common.sh"; then
+if ! . "${git_automation}/lib/common.sh"; then
   echo "Failed to load common dependencies." >&2
   exit 1
 fi
 
-# Test.
-test_main
+# Do git stuff.
+main "${@}"

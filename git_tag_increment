@@ -47,7 +47,7 @@ if test 'automatic' == "${arg:-automatic}"; then
     esac
   done <<< "$(
     git diff-index HEAD \
-    | awk '/\tests\// {print $5}'
+    | awk '/tests\// {print $5}'
   )"
   if test 1 -eq $minor; then
     level='minor'

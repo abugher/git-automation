@@ -24,13 +24,13 @@ function refresh_test_dir() {
   mkdir "${test_dir}"
   cd "${test_dir}"
 
-  initialize_repo "${master_single_repo}" "${main_single_repo}"
-  initialize_repo "${master_super_repo}" "${main_super_repo}"
-  initialize_repo "${master_sub_repo}" "${main_sub_repo}"
+  initialize_repo "${repo_single_master}" "${repo_single_isolated}"
+  initialize_repo "${repo_top_master}" "${repo_top_stacked}"
+  initialize_repo "${repo_bottom_master}" "${repo_bottom_isolated}"
 
-  cd "${main_super_repo}"
-  git submodule add "${master_sub_repo}" "${sub_repo_name}"
-  git add "${sub_sub_repo}"
+  cd "${repo_top_stacked}"
+  git submodule add "${repo_bottom_master}" bottom
+  git add "${repo_bottom_stacked}"
   git submodule update --init
   cd $oldpwd
 }
