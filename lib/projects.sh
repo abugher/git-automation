@@ -123,6 +123,15 @@ function project {
     git add "${subproject}" >/dev/null 2>&1 || fail "git add ${subproject} # submodule"
   done
 
+  increment_tag='no'
+  if test -e bin/test; then
+    if bin/test; then
+      increment_tag='yes'
+    fi
+  else
+    increment_tag='yes'
+  fi
+
   phase2
 
   git diff-index --quiet HEAD
