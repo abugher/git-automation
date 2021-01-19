@@ -35,5 +35,5 @@ function main() {
   fi
 
 
-  time project
+  project
 }
