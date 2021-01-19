@@ -1,7 +1,7 @@
 cd "${main_single_repo}"
 
-mkdir -p api_tests.d
-echo true > api_tests.d/test1
+mkdir -p tests
+echo true > tests/test1
 g 'No comment.' automatic > "${output_dir}/2.1.txt" 2>&1
 version="$(tail -n 1 < "${output_dir}/2.1.txt")"
 if ! test "${version}" == '0.1.0'; then
@@ -14,7 +14,7 @@ if ! test "${version}" == '0.1.0'; then
   return 2
 fi
 
-echo true >> api_tests.d/test1
+echo true >> tests/test1
 g 'No comment.' automatic > "${output_dir}/2.3.txt" 2>&1
 version="$(tail -n 1 < "${output_dir}/2.3.txt")"
 if ! test "${version}" == '0.2.0'; then
@@ -27,7 +27,7 @@ if ! test "${version}" == '0.2.0'; then
   return 4
 fi
 
-echo false > api_tests.d/test1
+echo false > tests/test1
 g 'No comment.' automatic > "${output_dir}/2.5.txt" 2>&1
 version="$(tail -n 1 < "${output_dir}/2.5.txt")"
 if ! test "${version}" == '0.3.0'; then

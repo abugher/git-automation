@@ -1,9 +1,9 @@
 cd "${main_single_repo}"
 
-mkdir -p api_tests.d
-echo true > api_tests.d/test1
+mkdir -p tests
+echo true > tests/test1
 g 'No comment.' automatic > "${output_dir}/3.1.1.txt" 2>&1
-rm api_tests.d/test1
+rm tests/test1
 g 'No comment.' automatic > "${output_dir}/3.1.2.txt" 2>&1
 version="$(tail -n 1 < "${output_dir}/3.1.2.txt")"
 if ! test "${version}" == '1.0.0'; then

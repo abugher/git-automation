@@ -63,8 +63,8 @@ refresh_test_dir() {
 rm -rf "${output_dir}"
 mkdir "${output_dir}"
 
-for t in api_tests.d/*; do
-  if test 'api_tests.d/*' == "${t}"; then
+for t in tests/*; do
+  if test 'tests/*' == "${t}"; then
     continue
   fi
   echo "Executing test:  ${t}"
