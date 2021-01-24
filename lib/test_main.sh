@@ -12,7 +12,6 @@ function test_main() {
     echo "Executing test:  ${t}"
     let test_count++
     cwd=$(pwd)
-    refresh_test_dir > /dev/null 2>&1
     if source "${t}"; then
       echo "Success:  ${test_count}:  ${t}"
       success_count=$(( success_count + 1 ))

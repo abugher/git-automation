@@ -1,5 +1,8 @@
+refresh_test_dir true
+
 cd "${repo_single_isolated}"
 
+# Increment automatically.
 mkdir -p tests
 echo true > tests/test1
 g 'No comment.' automatic > "${output_dir}/2.1.txt" 2>&1
@@ -7,48 +10,63 @@ version="$(get_version "${output_dir}/2.1.txt")"
 if ! test "${version}" == '0.1.0'; then
   return 1
 fi
-
+# Do not increment if nothing changed.
 g 'No comment.' automatic > "${output_dir}/2.2.txt" 2>&1
 version="$(get_version "${output_dir}/2.2.txt")"
 if ! test "${version}" == '0.1.0'; then
   return 2
 fi
 
+# Repeat above two tests.
 echo true >> tests/test1
 g 'No comment.' automatic > "${output_dir}/2.3.txt" 2>&1
 version="$(get_version "${output_dir}/2.3.txt")"
 if ! test "${version}" == '0.2.0'; then
   return 3
 fi
-
 g 'No comment.' automatic > "${output_dir}/2.4.txt" 2>&1
 version="$(get_version "${output_dir}/2.4.txt")"
 if ! test "${version}" == '0.2.0'; then
   return 4
 fi
 
-echo false > tests/test1
+# Repeat again, adding a test.
+echo true > tests/test2
 g 'No comment.' automatic > "${output_dir}/2.5.txt" 2>&1
 version="$(get_version "${output_dir}/2.5.txt")"
 if ! test "${version}" == '0.3.0'; then
   return 5
 fi
-
 g 'No comment.' automatic > "${output_dir}/2.6.txt" 2>&1
 version="$(get_version "${output_dir}/2.6.txt")"
 if ! test "${version}" == '0.3.0'; then
   return 6
 fi
 
+# Increment manually.
 touch thing1
 g 'No comment.' minor > "${output_dir}/2.7.txt" 2>&1
 version="$(get_version "${output_dir}/2.7.txt")"
 if ! test "${version}" == '0.4.0'; then
   return 7
 fi
-
+# Do not increment if nothing changed.
 g 'No comment.' minor > "${output_dir}/2.8.txt" 2>&1
 version="$(get_version "${output_dir}/2.8.txt")"
 if ! test "${version}" == '0.4.0'; then
   return 8
+fi
+
+# Do not increment if test is failing.
+echo false > bin/test
+g 'No comment.' automatic > "${output_dir}/2.9.txt" 2>&1
+version="$(get_version "${output_dir}/2.9.txt")"
+if ! test "${version}" == '0.4.0'; then
+  return 9
+fi
+touch thing2
+g 'No comment.' minor > "${output_dir}/2.10.txt" 2>&1
+version="$(get_version "${output_dir}/2.10.txt")"
+if ! test "${version}" == '0.4.0'; then
+  return 10
 fi

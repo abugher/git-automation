@@ -1,5 +1,8 @@
+refresh_test_dir true
+
 cd "${repo_single_isolated}"
 
+# Increment automatically.
 mkdir -p tests
 echo true > tests/test1
 g 'No comment.' automatic > "${output_dir}/3.1.1.txt" 2>&1
@@ -9,22 +12,53 @@ version="$(get_version "${output_dir}/3.1.2.txt")"
 if ! test "${version}" == '1.0.0'; then
   return 1
 fi
-
+# Do not increment if nothing changed.
 g 'No comment.' automatic > "${output_dir}/3.2.txt" 2>&1
 version="$(get_version "${output_dir}/3.2.txt")"
 if ! test "${version}" == '1.0.0'; then
   return 2
 fi
 
-touch thing1
-g 'No comment.' major > "${output_dir}/3.3.txt" 2>&1
-version="$(get_version "${output_dir}/3.3.txt")"
+# Repeat above two tests.
+echo true > tests/test1
+g 'No comment.' automatic > "${output_dir}/3.3.1.txt" 2>&1
+rm tests/test1
+g 'No comment.' automatic > "${output_dir}/3.3.2.txt" 2>&1
+version="$(get_version "${output_dir}/3.3.2.txt")"
 if ! test "${version}" == '2.0.0'; then
   return 3
 fi
-
-g 'No comment.' major > "${output_dir}/3.4.txt" 2>&1
+g 'No comment.' automatic > "${output_dir}/3.4.txt" 2>&1
 version="$(get_version "${output_dir}/3.4.txt")"
 if ! test "${version}" == '2.0.0'; then
   return 4
+fi
+
+# Increment manually.
+touch thing1
+g 'No comment.' major > "${output_dir}/3.5.txt" 2>&1
+version="$(get_version "${output_dir}/3.5.txt")"
+if ! test "${version}" == '3.0.0'; then
+  return 5
+fi
+# Do not increment if nothing changed.
+g 'No comment.' major > "${output_dir}/3.6.txt" 2>&1
+version="$(get_version "${output_dir}/3.6.txt")"
+if ! test "${version}" == '3.0.0'; then
+  return 6
+fi
+
+# Do not increment if test is failing.
+echo false > bin/test
+touch thing2
+g 'No comment.' automatic > "${output_dir}/3.7.txt" 2>&1
+version="$(get_version "${output_dir}/3.7.txt")"
+if ! test "${version}" == '3.0.0'; then
+  return 7
+fi
+touch thing3
+g 'No comment.' major > "${output_dir}/3.8.txt" 2>&1
+version="$(get_version "${output_dir}/3.8.txt")"
+if ! test "${version}" == '3.0.0'; then
+  return 8
 fi

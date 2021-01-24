@@ -1,8 +1,10 @@
+refresh_test_dir true
+
 cd "${repo_bottom_isolated}"
 touch thing1
 g "No comment." automatic > "${output_dir}/4.2.txt" 2>&1 || return 1
 version="$(get_version "${output_dir}/4.2.txt")"
-if ! test '0.0.1'; then
+if ! test "${version}" = '0.0.1'; then
   return 2
 fi
 
@@ -10,13 +12,13 @@ cd "${repo_bottom_stacked}"
 touch thing2
 g "No comment." automatic > "${output_dir}/4.1.txt" 2>&1 || return 3
 version="$(get_version "${output_dir}/4.1.txt")"
-if ! test '0.0.2'; then
+if ! test "${version}" = '0.0.2'; then
   return 4
 fi
 
 cd "${repo_bottom_isolated}"
 g "No comment." automatic > "${output_dir}/4.2.txt" 2>&1 || return 5
 version="$(get_version "${output_dir}/4.2.txt")"
-if ! test '0.0.2'; then
+if ! test "${version}" = '0.0.2'; then
   return 6
 fi

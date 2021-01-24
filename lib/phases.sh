@@ -43,7 +43,11 @@ function phase4() {
   git push --tags >/dev/null 2>&1 || fail "push tags"
   git submodule update >/dev/null 2>&1 || fail "update"
   if ! test 'set' = "${background:+set}"; then
-    echo -n "${project}:  "
-    git tag | sort -V | tail -n 1 || fail "display current version"
+    version="$(git tag | sort -V | tail -n 1)"
+    if grep . <<< "${version}"; then
+      echo "${project}:  ${version}"
+    else
+      echo "${project}:  no version"
+    fi
   fi
 }

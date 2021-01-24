@@ -128,8 +128,6 @@ function project {
     if bin/test; then
       increment_tag='yes'
     fi
-  else
-    increment_tag='yes'
   fi
 
   phase2

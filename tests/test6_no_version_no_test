@@ -1,0 +1,11 @@
+refresh_test_dir
+
+cd "${repo_single_isolated}"
+
+touch thing1
+g 'No comment.' automatic > "${output_dir}/6.1.txt" 2>&1
+last_line_expected='single:  no version'
+last_line_observed="$(tail -n 1 "${output_dir}/6.1.txt")"
+if ! test "${last_line_expected}" = "${last_line_observed}"; then
+  return 1
+fi
