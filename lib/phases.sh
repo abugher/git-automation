@@ -29,7 +29,7 @@ function phase2() {
 
 
 function phase3() {
-  if test 'yes' = "${increment_tag}"; then
+  if test -e bin/test && bin/test; then
     "${git_automation}/bin/git_tag_increment" "${level}" || fail "tag"
   fi
   # No quotes.
