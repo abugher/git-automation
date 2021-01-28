@@ -44,7 +44,7 @@ function phase4() {
   git submodule update >/dev/null 2>&1 || fail "update"
   if ! test 'set' = "${background:+set}"; then
     version="$(git tag | sort -V | tail -n 1)"
-    if grep . <<< "${version}"; then
+    if grep -q . <<< "${version}"; then
       echo "${project}:  ${version}"
     else
       echo "${project}:  no version"
