@@ -31,7 +31,7 @@ function subproject {
 
 
 function project {
-  project="${subproject:-"${top_project}"}"
+  local project="${subproject:-"${top_project}"}"
   subproject_pids=()
   subdir_pids=()
   remedial_subprojects=()
