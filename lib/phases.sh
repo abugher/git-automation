@@ -5,6 +5,10 @@ function phase1() {
   if git diff --quiet --exit-code >/dev/null 2>&1; then
     # Locking errors occur on:  .git/index.lock
     # Cause unknown.  'git checkout' returns:  128
+    # 2021-03-26:  Hypothesis:  There is a collision because subprojects' git
+    # configuration refers to higher level projects' configuration, so while
+    # processing subprojects in parallel, they will need to lock the same
+    # file(s).
     i=0
     git_checkout_ret=128
     while test 128 -eq "${git_checkout_ret}"; do
@@ -34,13 +38,12 @@ function phase3() {
   fi
   # No quotes.
   eval git commit ${commit_args} || fail "commit"
+  git push >/dev/null 2>&1 || fail "push"
+  git push --tags >/dev/null 2>&1 || fail "push tags"
 }
 
 
 function phase4() {
-  git checkout master >/dev/null 2>&1 || fail "checkout master (phase 4)"
-  git push >/dev/null 2>&1 || fail "push"
-  git push --tags >/dev/null 2>&1 || fail "push tags"
   git submodule update >/dev/null 2>&1 || fail "update"
   if ! test 'set' = "${background:+set}"; then
     version="$(git tag | sort -V | tail -n 1)"
