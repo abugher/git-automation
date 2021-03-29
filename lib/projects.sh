@@ -129,6 +129,7 @@ function project {
   git_diff_index_ret=$?
   case "${git_diff_index_ret}" in
     0)
+      phase3_alt
       phase4
       ;;
     1)
