@@ -44,10 +44,8 @@ function phase3() {
 
 
 function phase3_alt() {
-  # No changes to commit.  Try to push any commits sitting around, but don't
-  # fail.  git push will always fail for those without write access.  This
-  # could probably be more elegant.
-  git push >/dev/null 2>&1 || warn "push"
+  # No changes to commit.  Push any old commits.
+  git push --dry-run >/dev/null 2>&1 && git push >/dev/null 2>&1 || warn "push"
   git push --tags >/dev/null 2>&1 || warn "push tags"
 }
 
