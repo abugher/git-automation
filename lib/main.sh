@@ -31,7 +31,7 @@ function main() {
 
   commit_args=''
   if grep -q '.' <<< "${message}"; then
-    commit_args="-m '$(sed "s/'/'\"'\"'/g" <<< ${message})'"
+    commit_args="-S -m '$(sed "s/'/'\"'\"'/g" <<< ${message})'"
   fi
 
 
