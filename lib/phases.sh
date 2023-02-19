@@ -9,6 +9,7 @@ function phase1() {
     # configuration refers to higher level projects' configuration, so while
     # processing subprojects in parallel, they will need to lock the same
     # file(s).
+    # 2023-02-19:  Haven't seen that lately.
     i=0
     git_checkout_ret=128
     while test 128 -eq "${git_checkout_ret}"; do
