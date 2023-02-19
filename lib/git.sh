@@ -1,7 +1,7 @@
 #!/bin/bash
 
 
-function phase1() {
+function git_checkout() {
   if git diff --quiet --exit-code >/dev/null 2>&1; then
     # Locking errors occur on:  .git/index.lock
     # Cause unknown.  'git checkout' returns:  128
@@ -22,43 +22,48 @@ function phase1() {
       sleep .1
     done
   fi
+}
+
+
+function git_submodule_init() {
   git submodule init >/dev/null 2>&1 || fail "submodule init"
 }
 
 
-function phase2() {
+function git_pull() {
   git pull >/dev/null 2>&1 || fail "pull"
+}
+
+
+function git_add() {
   git add . >/dev/null 2>&1 || fail "add files"
   git add -u . >/dev/null 2>&1 || fail "remove files"
 }
 
 
-function phase3() {
-  if test -e bin/test && bin/test; then
-    "${git_automation}/bin/git_tag_increment" "${level}" || fail "tag"
-  fi
+function git_commit() {
   # No quotes.
   eval git commit ${commit_args} || fail "commit"
-  git push >/dev/null 2>&1 || fail "push"
-  git push --tags >/dev/null 2>&1 || fail "push tags"
 }
 
 
-function phase3_alt() {
+function git_push() {
+  git push >/dev/null 2>&1 || fail "push"
+}
+
+
+function git_push_old() {
   # No changes to commit.  Push any old commits.
   git push --dry-run >/dev/null 2>&1 && git push >/dev/null 2>&1 || warn "push"
   git push --tags >/dev/null 2>&1 || warn "push tags"
 }
 
 
-function phase4() {
+function git_submodule_update() {
   git submodule update >/dev/null 2>&1 || fail "update"
-  if ! test 'set' = "${background:+set}"; then
-    version="$(git tag | sort -V | tail -n 1)"
-    if grep -q . <<< "${version}"; then
-      echo "${project}:  ${version}"
-    else
-      echo "${project}:  no version"
-    fi
-  fi
+}
+
+
+function git_change_status() {
+  git diff-index --quiet HEAD
 }

@@ -74,7 +74,8 @@ function project {
     local background="${2}"
   fi
 
-  phase1
+  git_checkout
+  git_submodule_init
 
   subprojects_background
   subdirs_background
@@ -109,20 +110,22 @@ function project {
     git add "${subproject}" >/dev/null 2>&1 || fail "git add ${subproject} # submodule"
   done
 
-  phase2
+  git_pull
+  git_add
 
-  git diff-index --quiet HEAD
-  git_diff_index_ret=$?
+  git_change_status
+  change_status=$?
 
-  case "${git_diff_index_ret}" in
+  case "${change_status}" in
     0)
-      phase3_alt
-      phase4
+      git_push_old
+      git_submodule_update
       ;;
     1)
       if ! test 'set' = "${background:+set}"; then
-        phase3
-        phase4
+        git_commit
+        git_push
+        git_submodule_update
       else
         # Alert parent to try again in foreground.
         ret=2

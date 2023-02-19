@@ -11,7 +11,7 @@ cd "${OLDPWD}"
 libs=(
   'vars'
   'projects'
-  'phases'
+  'git'
   'main'
 )
 if ! . "${git_automation}/lib/common.sh"; then
