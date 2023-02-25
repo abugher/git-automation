@@ -1,0 +1,66 @@
+#!/bin/bash
+# unhyphen <submodule path>
+#
+# This helped fix the ansible roles to use dashes instead of underscores.
+
+
+function main() {
+  old_submodule="${1}"
+  new_submodule="$(sed -E 's/_/-/g' <<< "${old_submodule}")"
+
+  rename_upstream
+  rename_local
+  rename_remote
+  fix_gitmodules
+
+  echo "${new_submodule}"
+}
+
+
+function rename_local() {
+  git mv "${old_submodule}" "${new_submodule}" || fail "rename_local"
+}
+
+
+function rename_remote() {
+  cd "${new_submodule}" || fail "rename_reference:  cd"
+  old_origin="$(git remote get-url origin)" || fail "rename_reference:  old_origin"
+  new_origin="$(sed -E 's/_/-/g' <<< "${old_origin}")" || fail "rename_reference:  new_origin"
+  git remote set-url origin "${new_origin}" || fail "rename_reference:  set-url"
+  cd "${OLDPWD}" || fail "rename_reference:  cd back"
+}
+
+
+fix_gitmodules() {
+  old_url="$(
+    grep -A 2 "${old_submodule}" .gitmodules \
+      | tail -n 1 \
+      | awk '{print $3}'
+  )" || fail "fix_gitmodules:  old_url"
+
+  new_url="$(
+    sed -E 's/_/-/g' <<< "${old_url}"
+  )"
+
+  git submodule set-url "${old_submodule}" "${new_url}" || fail "fix_gitmodules:  set-url"
+
+  sed -iE "s#${old_submodule}#${new_submodule}#g" .gitmodules || fail "fix_gitmodules:  sed"
+}
+
+
+function rename_upstream() {
+  cd "${old_submodule}" || fail "rename_upstream:  cd"
+  origin="$(git remote get-url origin)" || fail "rename_upstream:  origin"
+  repo="$(sed -E 's#^.*/([^/]*)\.git$#\1#' <<< "${origin}")"
+  firefox "https://github.com/abugher/${repo}/settings" || fail "rename_upstream:  firefox"
+  cd "${OLDPWD}" || fail "rename_upstream:  cd back"
+}
+
+
+function fail() {
+  printf "Error:  %s\n" "${1}" >&2
+  exit 1
+}
+
+
+main "${@}"
