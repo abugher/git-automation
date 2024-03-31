@@ -50,8 +50,6 @@ function subdirs_background {
       test 'set' = "${pid:+set}" || fail "No PID set for subdir:  ${subdir}"
       subdir_pids+=( "${pid}" )
       subs_by_pid[pid$pid]="${subproject}"
-    else
-      warn "Skipping non-repo:  ${subdir}"
     fi
   done < <(subdirs)
 }
