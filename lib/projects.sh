@@ -17,6 +17,7 @@ function subproject {
 
   local oldpwd="${PWD}"
   cd "${subproject}" || fail "Enter subproject directory:  ${subproject}"
+  
   if test 'set' = "${background:+set}"; then
     project background &
     pid="${!}"
@@ -44,10 +45,14 @@ function subprojects_background {
 function subdirs_background {
   while read subdir; do
     unset pid
-    subproject "${subdir}" background
-    test 'set' = "${pid:+set}" || fail "No PID set for subdir:  ${subdir}"
-    subdir_pids+=( "${pid}" )
-    subs_by_pid[pid$pid]="${subproject}"
+    if test -e "${subdir}/.git"; then
+      subproject "${subdir}" background
+      test 'set' = "${pid:+set}" || fail "No PID set for subdir:  ${subdir}"
+      subdir_pids+=( "${pid}" )
+      subs_by_pid[pid$pid]="${subproject}"
+    else
+      warn "Skipping non-repo:  ${subdir}"
+    fi
   done < <(subdirs)
 }
 
