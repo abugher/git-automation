@@ -114,6 +114,10 @@ function project {
 
   for subproject_pid in "${subproject_pids[@]}"; do
     subproject="${subs_by_pid[pid$subproject_pid]}"
+    if test '' = "${subproject}"; then
+      warn "Empty subproject:  '${subproject}'"
+      continue
+    fi
     git add "${subproject}" >/dev/null 2>&1 || fail "git add ${subproject} # submodule"
   done
 
