@@ -84,6 +84,12 @@ function project {
   subdirs_background
 
   for sub_pid in "${subproject_pids[@]}" "${subdir_pids[@]}"; do
+    if test '' = "${sub_pid}"; then
+      warn "Empty PID:  '${sub_pid}'"
+      continue
+    else
+      debug "      PID:  '${sub_pid}'"
+    fi
     sub="${subs_by_pid[pid$sub_pid]}"
     wait -f "${sub_pid}" 
     sub_ret="${?}"
