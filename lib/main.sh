@@ -11,7 +11,8 @@ function main() {
     commit_args="-S -m '$(sed "s/'/'\"'\"'/g" <<< ${message})'"
   fi
 
-  branch="$(git branch | grep '^\*' | sed 's/^* //')"
+  branch="$(git branch | grep '^\*' | sed 's/^* //')" || fail "Failed to find branch."
+  debug "branch='${branch}'"
 
   project
 }

@@ -83,6 +83,7 @@ function project {
       git_submodule_init
     ;;
     sync_from)
+      # git_sync_from "${@}"
       fail "I don't know how to be:  '${self_name}' -- yet!"
     ;;
     *)
