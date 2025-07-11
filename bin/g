@@ -1,11 +1,14 @@
 #!/bin/bash
 
 
-# Find self.
-self="$(readlink -f "${0}")"
-cd "${self%/*}/.."
+# Find location of self.
+self_path="$(readlink -f "${0}")"
+cd "${self_path%/*}/.."
 git_automation="${PWD}"
 cd "${OLDPWD}"
+
+# Find identity of self.
+self_name="${0##*/}"
 
 # Load libraries.
 libs=(

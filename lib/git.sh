@@ -17,7 +17,7 @@ function git_checkout() {
       if test 5 -lt "${i}"; then
         fail "Locked up."
       fi
-      git checkout master >/dev/null 2>&1 && break
+      git checkout "${branch}" >/dev/null 2>&1 && break
       git_checkout_ret="${?}"
       sleep .1
     done

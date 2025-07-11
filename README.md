@@ -10,12 +10,14 @@ recursively, depth first.  If a commit message is specified, it will be applied
 to all commits; otherwise, git will start an editor for a message for each
 commit.
 
+The branch for the top level directory will be checked out for each subproject
+and subdirectory.
+
 # BUGS
 
-It is currently assumed that only the `master` branch is in use for each
-project.  If a project or subproject has a different branch checked out when
-`g` is run, the expected results are undocumented.  Decide on correct behavior
-and codify that.
+There should probably be a feature to sync the whole hierarchy from a specific
+branch.  This could be used to sync `dev` to `stg` for testing, and after
+testing to sync `stg` to `prd`.
 
 New subprojects must be added by hand with `git submodule`.  Ideally `g`
 should recognize and add any new subproject, but there may not be a clear basis

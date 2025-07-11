@@ -11,5 +11,7 @@ function main() {
     commit_args="-S -m '$(sed "s/'/'\"'\"'/g" <<< ${message})'"
   fi
 
+  branch="$(git branch | grep '^\*' | sed 's/^* //')"
+
   project
 }

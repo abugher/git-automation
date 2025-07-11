@@ -77,8 +77,18 @@ function project {
     local background="${2}"
   fi
 
-  git_checkout
-  git_submodule_init
+  case "${self_name}" in
+    g)
+      git_checkout
+      git_submodule_init
+    ;;
+    sync_from)
+      fail "I don't know how to be:  '${self_name}' -- yet!"
+    ;;
+    *)
+      fail "I don't know how to be:  '${self_name}'"
+    ;;
+  esac
 
   subprojects_background
   subdirs_background
