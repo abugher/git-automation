@@ -21,6 +21,7 @@ function git_checkout() {
       git_checkout_ret="${?}"
       sleep .1
     done
+    debug "git_checkout_ret='${git_checkout_ret}'"
   fi
 }
 
