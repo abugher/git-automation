@@ -17,11 +17,16 @@ function git_checkout() {
       if test 5 -lt "${i}"; then
         fail "Locked up."
       fi
-      git checkout "${branch}" >/dev/null 2>&1 && break
+      git checkout "${branch}" >/dev/null 2>&1
       git_checkout_ret="${?}"
+      if test 0 -eq "${git_checkout_ret}"; then
+        break
+      fi
       sleep .1
     done
-    debug "git_checkout_ret='${git_checkout_ret}'"
+    if ! test 0 -eq "${git_checkout_ret}"; then
+      fail "'git checkout ${branch}' returned:  ${git_checkout_ret}"
+    fi
   fi
 }
 
