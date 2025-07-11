@@ -73,3 +73,8 @@ function git_submodule_update() {
 function git_change_status() {
   git diff-index --quiet HEAD
 }
+
+function git_sync_from() {
+  upstream_branch="${1}"
+  git pull origin "${upstream_branch}"
+}

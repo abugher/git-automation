@@ -12,7 +12,6 @@ function main() {
   fi
 
   branch="$(git branch | grep '^\*' | sed 's/^* //')" || fail "Failed to find branch."
-  debug "branch='${branch}'"
 
   project
 }
