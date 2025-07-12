@@ -145,9 +145,19 @@ function project {
       ;;
     1)
       if ! test 'set' = "${background:+set}"; then
-        git_commit
-        git_push
-        git_submodule_update
+        case "${self_name}" in
+          g)
+            git_commit
+            git_push
+            git_submodule_update
+          ;;
+          sync_from)
+            true
+          ;;
+          *)
+            fail "I don't know how to be:  '${self_name}'"
+          ;;
+        esac
       else
         # Alert parent to try again in foreground.
         ret=2
