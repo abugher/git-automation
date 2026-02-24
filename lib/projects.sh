@@ -181,7 +181,7 @@ function project {
 
 
 function cache_pull() {
-  for sync in *.sync; do
+  for sync in cache/*.sync; do
     local oldpwd="${PWD}"
     cd "${sync}" || fail "Failed to enter cache sync repo directory:  '${sync}'"
     git_pull
@@ -192,7 +192,7 @@ function cache_pull() {
 
 
 function cache_push() {
-  for cache in *.git; do
+  for cache in cache/*.git; do
     local oldpwd="${PWD}"
     cd "${cache}" || fail "Failed to enter cache repo directory:  '${cache}'"
     git push
