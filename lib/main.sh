@@ -2,6 +2,8 @@
 
 
 function main() {
+  shopt -s nullglob
+
   # The argument can be a message or a branch depending on context.
   message="${1}"
   upstream_branch="${1}"

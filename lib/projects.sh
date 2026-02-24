@@ -90,6 +90,8 @@ function project {
     ;;
   esac
 
+  cache_pull
+
   subprojects_background
   subdirs_background
 
@@ -167,5 +169,33 @@ function project {
       fail "unrecognized return code from git diff-index:  ${ret}"
   esac
 
+  cache_push
+
   return "${ret}"
+}
+
+
+# cache_pull, cache_push:  Special handling for my own style of local caching.
+# *.sync is a working repo intended to pull from the network upstream and push
+# to the local cache.  *.git is a bare repo intended to serve as local cache.
+
+
+function cache_pull() {
+  for sync in *.sync; do
+    local oldpwd="${PWD}"
+    cd "${sync}" || fail "Failed to enter cache sync repo directory:  '${sync}'"
+    git_pull
+    git push
+    cd "${oldpwd}" || fail "Failed to leave cache sync repo directory:  '${sync}'"
+  done
+}
+
+
+function cache_push() {
+  for cache in *.git; do
+    local oldpwd="${PWD}"
+    cd "${cache}" || fail "Failed to enter cache repo directory:  '${cache}'"
+    git push
+    cd "${oldpwd}" || fail "Failed to leave cache repo directory:  '${cache}'"
+  done
 }
